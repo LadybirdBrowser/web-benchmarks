@@ -104,7 +104,7 @@ def start_http_server():
     return server
 
 
-def run_benchmark(benchmark_path, runner_url, benchmark_params, ladybird_arguments):
+def run_benchmark(benchmark_path, runner_url, benchmark_params, ladybird_arguments, verbose=False):
     current_dir = os.getcwd()
     os.chdir(benchmark_path)
     server = start_http_server()
@@ -116,11 +116,14 @@ def run_benchmark(benchmark_path, runner_url, benchmark_params, ladybird_argumen
     ladybird_cmd = ladybird_arguments + [url]
 
     try:
-        process = subprocess.Popen(
-            ladybird_cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT
-        )
+        if verbose:
+            process = subprocess.Popen(ladybird_cmd)
+        else:
+            process = subprocess.Popen(
+                ladybird_cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT
+            )
         server.running_ladybird_process = process
 
         process.communicate()
@@ -148,6 +151,7 @@ def main():
     parser.add_argument("--iterations", type=int, help="Number of iterations to run")
     parser.add_argument("--show-window", action="store_true", help="Show the browser window during the test run")
     parser.add_argument("--output", "-o", default="results.json", help="JSON output file name.")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Show stdout and stderr output from the browser")
 
     args = parser.parse_args()
 
@@ -184,7 +188,7 @@ def main():
         if not benchmark_path.exists():
             print(f"Benchmark '{benchmark}' not found in benchmarks directory.", file=sys.stderr)
             sys.exit(1)
-        run_benchmark(benchmark_path, runner_url, params, ladybird_arguments)
+        run_benchmark(benchmark_path, runner_url, params, ladybird_arguments, verbose=args.verbose)
 
     test_times_data = []
     for benchmark, suites in test_results.items():
