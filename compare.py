@@ -37,7 +37,9 @@ def extract_tests(data):
                 suite_name = ""
                 test_name = test_key
 
-            time_data = metrics.get("time", {})
+            time_data = metrics.get("time")
+            if not isinstance(time_data, dict):
+                continue
             values = time_data.get("runs", [])
 
             if not values:

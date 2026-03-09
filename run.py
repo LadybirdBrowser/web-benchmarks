@@ -232,6 +232,7 @@ def main():
                 min_value = min(runs)
                 max_value = max(runs)
                 formatted_results[benchmark][key] = {
+                    "category": "web",
                     "time": {
                         "mean": mean_value,
                         "stdev": std_dev,
