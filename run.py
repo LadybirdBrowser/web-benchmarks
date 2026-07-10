@@ -16,6 +16,12 @@ from pathlib import Path
 from tabulate import tabulate
 from urllib.parse import urlunparse, urlencode
 
+# How long the browser gets to launch, load the page, and start running the first test.
+STARTUP_TIMEOUT_SECONDS = 10
+
+# How long the browser gets to exit after being sent SIGINT at the end of a benchmark.
+SHUTDOWN_GRACE_PERIOD_SECONDS = 10
+
 test_results = {}
 benchmark_totals = {}
 def append_table_data(benchmark, results):
@@ -53,7 +59,17 @@ def append_table_data(benchmark, results):
 
 class BenchmarkHTTPRequestHandler(SimpleHTTPRequestHandler):
     def do_POST(self):
-        if self.path == "/TestComplete":
+        self.server.last_progress_time = time.monotonic()
+        if self.path == "/TestStarting":
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            json_data = json.loads(post_data.decode('utf-8'))
+            self.server.current_test = f"{json_data["benchmark"]}/{json_data["suite"]}/{json_data["test"]}"
+            self.server.phase = "running"
+            self.send_response(200)
+            self.end_headers()
+
+        elif self.path == "/TestComplete":
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             json_data = json.loads(post_data.decode('utf-8'))
@@ -69,6 +85,7 @@ class BenchmarkHTTPRequestHandler(SimpleHTTPRequestHandler):
             self.end_headers()
 
         elif self.path == "/BenchmarkComplete":
+            self.server.phase = "finished"
             def run_callback():
                 if self.server.running_ladybird_process:
                     self.server.running_ladybird_process.send_signal(signal.SIGINT)
@@ -89,6 +106,9 @@ def start_http_server():
     server = HTTPServer(('localhost', 0), BenchmarkHTTPRequestHandler)
     server.running_ladybird_process = None
     server.iteration_count = 1
+    server.last_progress_time = time.monotonic()
+    server.current_test = None
+    server.phase = "startup"
     server.server_thread = threading.Thread(target=server.serve_forever, daemon=True)
     server.server_thread.start()
     for _ in range(50):
@@ -104,7 +124,7 @@ def start_http_server():
     return server
 
 
-def run_benchmark(benchmark_path, runner_url, benchmark_params, ladybird_arguments, verbose=False):
+def run_benchmark(benchmark_path, runner_url, benchmark_params, ladybird_arguments, timeout, verbose=False):
     current_dir = os.getcwd()
     os.chdir(benchmark_path)
     server = start_http_server()
@@ -121,15 +141,38 @@ def run_benchmark(benchmark_path, runner_url, benchmark_params, ladybird_argumen
         else:
             process = subprocess.Popen(
                 ladybird_cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
             )
         server.running_ladybird_process = process
 
-        process.communicate()
+        while True:
+            try:
+                process.wait(timeout=0.5)
+                return True
+            except subprocess.TimeoutExpired:
+                stalled_time = time.monotonic() - server.last_progress_time
+                if server.phase == "startup":
+                    if stalled_time > STARTUP_TIMEOUT_SECONDS:
+                        print(f"Error: Benchmark did not start running tests within {STARTUP_TIMEOUT_SECONDS} seconds.", file=sys.stderr)
+                        break
+                elif server.phase == "running":
+                    if timeout and stalled_time > timeout:
+                        print(f"Error: Test '{server.current_test}' did not complete within {timeout:g} seconds.", file=sys.stderr)
+                        break
+                elif server.phase == "finished":
+                    if stalled_time > SHUTDOWN_GRACE_PERIOD_SECONDS:
+                        process.kill()
+                        process.wait()
+                        return True
+
+        process.kill()
+        process.wait()
+        return False
 
     except KeyboardInterrupt:
         print("\nInterrupted by user.")
+        process.kill()
         sys.exit(1)
     finally:
         server.shutdown()
@@ -151,6 +194,7 @@ def main():
     parser.add_argument("--iterations", type=int, help="Number of iterations to run")
     parser.add_argument("--show-window", action="store_true", help="Show the browser window during the test run")
     parser.add_argument("--output", "-o", default="results.json", help="JSON output file name.")
+    parser.add_argument("--timeout", type=float, default=10, help="Per-test timeout in seconds; the browser is killed if no test completes within this time (0 to disable)")
     parser.add_argument("--verbose", "-v", action="store_true", help="Show stdout and stderr output from the browser")
 
     args = parser.parse_args()
@@ -180,6 +224,7 @@ def main():
 
     benchmarks_dir = Path(__file__).parent / "benchmarks"
 
+    timed_out_benchmarks = []
     for benchmark in benchmarks:
         if args.benchmarks != "all" and benchmark not in args.benchmarks.split(","):
             continue
@@ -188,7 +233,8 @@ def main():
         if not benchmark_path.exists():
             print(f"Benchmark '{benchmark}' not found in benchmarks directory.", file=sys.stderr)
             sys.exit(1)
-        run_benchmark(benchmark_path, runner_url, params, ladybird_arguments, verbose=args.verbose)
+        if not run_benchmark(benchmark_path, runner_url, params, ladybird_arguments, args.timeout, verbose=args.verbose):
+            timed_out_benchmarks.append(benchmark)
 
     test_times_data = []
     for benchmark, suites in test_results.items():
@@ -269,6 +315,10 @@ def main():
 
     with open(args.output, "w") as f:
         json.dump(formatted_results, f, indent=4)
+
+    if timed_out_benchmarks:
+        print(f"\nError: The following benchmarks timed out: {', '.join(timed_out_benchmarks)}", file=sys.stderr)
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

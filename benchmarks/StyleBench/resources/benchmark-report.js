@@ -3,6 +3,16 @@
     window.onload = function () {
         startBenchmark();
         showSection("running");
+        const originalWillRunTest = window.benchmarkClient.willRunTest;
+        window.benchmarkClient.willRunTest = function (suite, test) {
+            originalWillRunTest.call(this, suite, test);
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/TestStarting");
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            const results = {benchmark: "StyleBench", suite: suite.name, test: test.name};
+            xhr.send(JSON.stringify(results));
+        }
+
         const originalDidRunTest = window.benchmarkClient.didRunTest;
         window.benchmarkClient.didRunTest = function (suite, test) {
             originalDidRunTest.call(this, suite, test);

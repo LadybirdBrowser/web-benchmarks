@@ -82,6 +82,11 @@ class MainBenchmarkClient {
     }
 
     willRunTest(suite, test) {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/TestStarting");
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        const results = {benchmark: "Speedometer3", suite: suite.name, test: test.name};
+        xhr.send(JSON.stringify(results));
         document.getElementById("info-label").textContent = suite.name;
         document.getElementById("info-progress").textContent = `${this._finishedTestCount} / ${this.stepCount}`;
     }
