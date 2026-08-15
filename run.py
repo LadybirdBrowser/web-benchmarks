@@ -53,9 +53,9 @@ def append_table_data(benchmark, results):
         benchmark_totals[benchmark]["totalTime"] = []
     benchmark_totals[benchmark]["totalTime"].append(results["total"] / 1000)
 
-    if "score" not in benchmark_totals[benchmark]:
-        benchmark_totals[benchmark]["score"] = []
-    benchmark_totals[benchmark]["score"].append(results["score"])
+    if "reported_score" not in benchmark_totals[benchmark]:
+        benchmark_totals[benchmark]["reported_score"] = []
+    benchmark_totals[benchmark]["reported_score"].append(results["score"])
 
 class BenchmarkHTTPRequestHandler(SimpleHTTPRequestHandler):
     def do_POST(self):
@@ -251,7 +251,7 @@ def main():
     benchmark_scores_data = []
     for total in benchmark_totals.items():
         benchmark, values = total
-        scores = values["score"]
+        scores = values["reported_score"]
         mean_score = statistics.mean(scores)
         std_dev_score = statistics.stdev(scores) if len(scores) > 1 else 0.0
         min_score = min(scores)
@@ -301,11 +301,11 @@ def main():
                         "runs": times
                     }
                 }
-            if "score" in totals:
-                scores = totals["score"]
+            if "reported_score" in totals:
+                scores = totals["reported_score"]
                 if "_total" not in formatted_results[benchmark]:
                     formatted_results[benchmark]["_total"] = {}
-                formatted_results[benchmark]["_total"]["score"] = {
+                formatted_results[benchmark]["_total"]["reported_score"] = {
                     "mean": statistics.mean(scores),
                     "stdev": statistics.stdev(scores) if len(scores) > 1 else 0.0,
                     "min": min(scores),

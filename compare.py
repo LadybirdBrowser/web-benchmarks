@@ -60,7 +60,7 @@ def extract_scores(data):
         total = tests.get("_total", {})
         if total:
             scores[benchmark] = {
-                "score": total.get("score", {}).get("runs", []),
+                "reported_score": total.get("reported_score", {}).get("runs", []),
                 "totalTime": total.get("time", {}).get("runs", []),
             }
     return scores
@@ -122,8 +122,8 @@ def main():
         old = old_scores.get(bench, {})
         new = new_scores.get(bench, {})
 
-        old_score = old.get("score", [])
-        new_score = new.get("score", [])
+        old_score = old.get("reported_score", [])
+        new_score = new.get("reported_score", [])
         old_time = old.get("totalTime", [])
         new_time = new.get("totalTime", [])
 
