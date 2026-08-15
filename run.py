@@ -149,6 +149,9 @@ def run_benchmark(benchmark_path, runner_url, benchmark_params, ladybird_argumen
         while True:
             try:
                 process.wait(timeout=0.5)
+                if server.phase != "finished":
+                    print(f"Error: Benchmark process exited with status {process.returncode} before completing.", file=sys.stderr)
+                    return False
                 return True
             except subprocess.TimeoutExpired:
                 stalled_time = time.monotonic() - server.last_progress_time
@@ -224,7 +227,7 @@ def main():
 
     benchmarks_dir = Path(__file__).parent / "benchmarks"
 
-    timed_out_benchmarks = []
+    failed_benchmarks = []
     for benchmark in benchmarks:
         if args.benchmarks != "all" and benchmark not in args.benchmarks.split(","):
             continue
@@ -234,7 +237,7 @@ def main():
             print(f"Benchmark '{benchmark}' not found in benchmarks directory.", file=sys.stderr)
             sys.exit(1)
         if not run_benchmark(benchmark_path, runner_url, params, ladybird_arguments, args.timeout, verbose=args.verbose):
-            timed_out_benchmarks.append(benchmark)
+            failed_benchmarks.append(benchmark)
 
     test_times_data = []
     for benchmark, suites in test_results.items():
@@ -316,8 +319,8 @@ def main():
     with open(args.output, "w") as f:
         json.dump(formatted_results, f, indent=4)
 
-    if timed_out_benchmarks:
-        print(f"\nError: The following benchmarks timed out: {', '.join(timed_out_benchmarks)}", file=sys.stderr)
+    if failed_benchmarks:
+        print(f"\nError: The following benchmarks failed: {', '.join(failed_benchmarks)}", file=sys.stderr)
         sys.exit(1)
 
 if __name__ == "__main__":
