@@ -1,0 +1,12 @@
+# These tests are also skipped by WebKit's performance test runner.
+SVG/France.html
+SVG/FrancoBolloGnomeEzechi.html
+SVG/GearFlowers.html
+SVG/HereGear.html
+SVG/MtSaintHelens.html
+SVG/Samurai.html
+SVG/SierpinskiCarpet.html
+SVG/SvgNestedUse.html
+
+# These tests exceed the per-test runtime budget in Ladybird.
+SVG/FoodLeifLodahl.html

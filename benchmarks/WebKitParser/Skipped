@@ -1,0 +1,11 @@
+# This test is also skipped by WebKit's performance test runner.
+Parser/html-parser-threaded.html
+
+# These tests repeatedly render an 18 MiB document and do not complete within
+# a practical benchmark runtime in Ladybird.
+Parser/HTML5-8266-FullRender.html
+Parser/html5-full-render.html
+
+# This test parses 16 MiB of deliberately split malformed tags and does not
+# complete within a practical benchmark runtime in Ladybird.
+Parser/pending-text-buffer-parser.html

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>WebKit DOM Performance Tests</title>
+<p>Starting WebKitDOM</p>
+<iframe width="800" height="600"></iframe>
+<script>
+window.webKitBenchmark = {
+    name: "WebKitDOM",
+    suite: "DOM",
+    tests: [
+        "DOM/Accessors.html",
+        "DOM/CloneNodes.html",
+        "DOM/CreateNodes.html",
+        "DOM/DOMDivWalk.html",
+        "DOM/DOMTable.html",
+        "DOM/DOMWalk.html",
+        "DOM/Events.html",
+        "DOM/GetElement.html",
+        "DOM/GridSort.html",
+        "DOM/MessagePort/throughput-same-context-batch.html",
+        "DOM/MessagePort/throughput-same-context-new-ports.html",
+        "DOM/MessagePort/throughput-same-context.html",
+        "DOM/ModifyAttribute.html",
+        "DOM/Template.html",
+        { path: "DOM/large-table-edit.html", runCount: 1 },
+        { path: "DOM/textarea-dom.html", runCount: 4 },
+        { path: "DOM/textarea-edit.html", runCount: 2048 },
+    ],
+};
+</script>
+<script src="resources/benchmark-runner.js"></script>

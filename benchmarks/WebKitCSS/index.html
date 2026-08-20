@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>WebKit CSS Performance Tests</title>
+<p>Starting WebKitCSS</p>
+<iframe width="800" height="600"></iframe>
+<script>
+window.webKitBenchmark = {
+    name: "WebKitCSS",
+    suite: "CSS",
+    tests: [
+        { path: "CSS/CSSPropertySetterGetter.html", runCount: 8 },
+        { path: "CSS/CSSPropertyUpdateValue.html", runCount: 64 },
+        { path: "CSS/FontFaceSetUpdateStyle.html", runCount: 32 },
+        { path: "CSS/HasWithChildCombinatorInIs.html", runCount: 8 },
+        "CSS/ManyMatchMediaInstances.html",
+        { path: "CSS/PseudoClassSelectors.html", runCount: 2048 },
+        "CSS/QuerySelector.html",
+        "CSS/StyleSheetInsert.html",
+        { path: "CSS/WhereIsClassRuleIndexing.html", runCount: 1024 },
+        { path: "CSS/WhereIsRuleIndexing.html", runCount: 1 },
+    ],
+};
+</script>
+<script src="resources/benchmark-runner.js"></script>

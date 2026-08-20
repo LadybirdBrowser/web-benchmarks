@@ -1,0 +1,7 @@
+# This test is also skipped by WebKit's performance test runner.
+DOM/TraverseChildNodes.html
+
+# These tests exceed Ladybird's display-list IPC payload limit before
+# completing their measured workload.
+DOM/get-elements-by-class-name-traversal-uncached.html
+DOM/get-elements-by-tag-name-traversal-uncached.html

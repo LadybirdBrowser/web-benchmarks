@@ -1,0 +1,3 @@
+# These tests are also skipped by WebKit's performance test runner.
+Bindings/insert-img-with-src.html
+Bindings/update-name-getter.html

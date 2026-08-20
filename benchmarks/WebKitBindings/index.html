@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>WebKit Bindings Performance Tests</title>
+<p>Starting WebKitBindings</p>
+<iframe width="800" height="600"></iframe>
+<script>
+window.webKitBenchmark = {
+    name: "WebKitBindings",
+    suite: "Bindings",
+    tests: [
+        { path: "Bindings/append-child.html", runCount: 8 },
+        { path: "Bindings/childNodes-traversal.html", runCount: 256 },
+        { path: "Bindings/children-traversal.html", runCount: 512 },
+        { path: "Bindings/create-element.html", runCount: 64 },
+        { path: "Bindings/document-implementation.html", runCount: 32 },
+        { path: "Bindings/event-target-wrapper.html", runCount: 32 },
+        { path: "Bindings/first-child.html", runCount: 32 },
+        "Bindings/gc-forest.html",
+        "Bindings/gc-mini-tree.html",
+        "Bindings/gc-tree.html",
+        { path: "Bindings/get-attribute.html", runCount: 32 },
+        { path: "Bindings/get-element-by-id.html", runCount: 32 },
+        { path: "Bindings/get-elements-by-tag-name.html", runCount: 8 },
+        { path: "Bindings/id-getter.html", runCount: 16 },
+        { path: "Bindings/id-setter.html", runCount: 8 },
+        { path: "Bindings/insert-before.html", runCount: 8 },
+        { path: "Bindings/node-list-access.html", runCount: 32 },
+        { path: "Bindings/scroll-top.html", runCount: 2 },
+        { path: "Bindings/set-attribute.html", runCount: 32 },
+        { path: "Bindings/typed-array-construct-from-array.html", runCount: 2 },
+        { path: "Bindings/typed-array-construct-from-same-type.html", runCount: 128 },
+        { path: "Bindings/typed-array-construct-from-typed.html", runCount: 2 },
+        { path: "Bindings/typed-array-set-from-typed.html", runCount: 2 },
+        { path: "Bindings/undefined-first-child.html", runCount: 32 },
+        { path: "Bindings/undefined-get-element-by-id.html", runCount: 32 },
+        { path: "Bindings/undefined-id-getter.html", runCount: 32 },
+    ],
+};
+</script>
+<script src="resources/benchmark-runner.js"></script>

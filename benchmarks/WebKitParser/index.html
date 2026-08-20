@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>WebKit Parser Performance Tests</title>
+<p>Starting WebKitParser</p>
+<iframe width="800" height="600"></iframe>
+<script>
+window.webKitBenchmark = {
+    name: "WebKitParser",
+    suite: "Parser",
+    tests: [
+        "Parser/HTML5-8266-ParseOnly.html",
+        { path: "Parser/css-parser-yui.html", runCount: 16 },
+        "Parser/html-parser.html",
+        { path: "Parser/iframe-append-remove.html", runCount: 64 },
+        { path: "Parser/innerHTML-setter.html", runCount: 32 },
+        { path: "Parser/query-selector-deep.html", runCount: 4096 },
+        { path: "Parser/query-selector-first.html", runCount: 512 },
+        { path: "Parser/query-selector-last.html", runCount: 4096 },
+        { path: "Parser/simple-url.html", runCount: 1 },
+        { path: "Parser/textarea-parsing.html", runCount: 32 },
+        { path: "Parser/tiny-innerHTML.html", runCount: 1 },
+        { path: "Parser/url-parser.html", runCount: 1 },
+        { path: "Parser/xml-parser.html", runCount: 1 },
+    ],
+};
+</script>
+<script src="resources/benchmark-runner.js"></script>

@@ -27,6 +27,22 @@ executable using the `--executable` argument. For example:
 ./run.py --executable "${LADYBIRD_SOURCE_DIR}/Build/distribution/bin/ladybird" --output results.json  
 ```
 
+Use `--benchmarks` to select one or more benchmarks. The imported WebKit
+performance suites are available as `WebKitBindings`, `WebKitCSS`, `WebKitDOM`,
+`WebKitParser`, and `WebKitSVG`:
+
+```bash
+./run.py --executable "${LADYBIRD_SOURCE_DIR}/Build/distribution/bin/ladybird" \
+    --benchmarks WebKitDOM,WebKitCSS --output results.json
+```
+
+These suites were imported from WebKit revision
+`2e5d042491f325b2df778dbba97c48d66bf2d395`. They run one sample per test by
+default; pass `--iterations` to choose another sample count. Runs-per-second
+tests use fixed batch sizes and report the elapsed time for that workload, so
+faster code also shortens the benchmark run. Each suite's `Skipped` file records
+tests excluded by WebKit or by this runner.
+
 ## Comparing Results
 
 After running benchmarks and saving the results as a JSON file, you can compare the results using the `compare.py` 
