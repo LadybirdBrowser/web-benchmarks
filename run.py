@@ -195,6 +195,7 @@ def main():
         "Speedometer2": { "runner_url": "index.html" },
         "Speedometer3": { "runner_url": "index.html" },
         "StyleBench": { "runner_url": "index.html" },
+        "StyleBenchConservative": { "runner_url": "StyleBenchConservative/index.html", "server_root": "." },
         "WebKitBindings": { "runner_url": "index.html", "timeout": 30 },
         "WebKitCSS": { "runner_url": "index.html", "timeout": 30 },
         "WebKitDOM": { "runner_url": "index.html", "timeout": 30 },
@@ -245,7 +246,8 @@ def main():
         if not benchmark_path.exists():
             print(f"Benchmark '{benchmark}' not found in benchmarks directory.", file=sys.stderr)
             sys.exit(1)
-        if not run_benchmark(benchmark_path, runner_url, params, ladybird_arguments, timeout, verbose=args.verbose):
+        server_root = benchmarks_dir / available_benchmarks[benchmark].get("server_root", benchmark)
+        if not run_benchmark(server_root, runner_url, params, ladybird_arguments, timeout, verbose=args.verbose):
             failed_benchmarks.append(benchmark)
 
     test_times_data = []

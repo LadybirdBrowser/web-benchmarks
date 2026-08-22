@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>StyleBenchConservative 0.4</title>
+    <link rel="stylesheet" href="../StyleBench/resources/main.css">
+    <script src="../StyleBench/resources/main.js" defer></script>
+    <script src="../StyleBench/resources/benchmark-runner.js" defer></script>
+    <script src="resources/conservative-runner.js" defer></script>
+    <script src="../StyleBench/resources/benchmark-report.js" defer></script>
+    <script src="../resources/statistics.js" defer></script>
+    <script src="../StyleBench/resources/style-bench.js" defer></script>
+    <script src="../StyleBench/resources/tests.js" defer></script>
+</head>
+<body>
+<main>
+    <a id="logo-link" href="javascript:showHome()"></a>
+
+    <section id="home" class="selected">
+        <p>
+            StyleBenchConservative measures style resolution performance with explicit style and layout flushes.
+        </p>
+        <p id="screen-size-warning"><strong>
+            Your browser window is too small. For most accurate results, please make the view port size at least 850px by 650px.<br>
+            It's currently <span id="screen-size"></span>.
+        </strong>
+        <div class="buttons">
+            <button onclick="startTest()">Start Test</button>
+        </div>
+        <p class="show-about"><a href="javascript:showAbout()">About StyleBenchConservative</a></p>
+    </section>
+
+    <section id="running">
+        <div id="testContainer"></div>
+        <div id="progress"><div id="progress-completed"></div></div>
+        <div id="info"></div>
+    </section>
+
+    <section id="summarized-results">
+        <h1>Runs / Minute</h1>
+        <div class="gauge"><div class="window"><div class="needle"></div></div></div>
+        <hr>
+        <div id="result-number"></div>
+        <div id="confidence-number"></div>
+        <div class="buttons">
+            <button onclick="startTest()">Test Again</button>
+            <button class="show-details" onclick="showResultDetails()">Details</button>
+        </div>
+    </section>
+
+    <section id="detailed-results">
+        <h1>Detailed Results</h1>
+        <table class="results-table"></table>
+        <table class="results-table"></table>
+        <div class="arithmetic-mean"><label>Arithmetic Mean:</label><span id="results-with-statistics"></span></div>
+        <div class="buttons">
+            <button onclick="startTest()">Test Again</button>
+            <button id="show-summary" onclick="showResultsSummary()">Summary</button>
+        </div>
+        <p class="show-about"><a href="javascript:showAbout()">About StyleBenchConservative</a></p>
+    </section>
+
+    <section id="about">
+        <h1>About StyleBenchConservative</h1>
+
+        <p>StyleBenchConservative runs the same style resolution and style invalidation workload as StyleBench. Before and after each mutation, it reads the body's computed <code>backgroundColor</code> and bounding rectangle to explicitly flush both style and layout.</p>
+
+        <p>StyleBench uses the Speedometer framework for UI and measurements.</p>
+    </section>
+    <section id="local-message">
+        <h2>Access via 'file:' protocol</h2>
+        <p>To run locally, launch a web server under the benchmarks directory and access <code>StyleBenchConservative</code> through that server.</p>
+        <p>
+            Individual tests (without measurement) can also be run from <a href="resources/style-bench.html">resources/style-bench.html</a>.
+        </p>
+    </section>
+</main>
+</body>
+</html>

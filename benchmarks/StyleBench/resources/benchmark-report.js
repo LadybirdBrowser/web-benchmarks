@@ -1,5 +1,7 @@
 // This file can be customized to report results as needed.
 (function () {
+    const benchmarkName = window.styleBenchName || "StyleBench";
+
     window.onload = function () {
         startBenchmark();
         showSection("running");
@@ -9,7 +11,7 @@
             const xhr = new XMLHttpRequest();
             xhr.open("POST", "/TestStarting");
             xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            const results = {benchmark: "StyleBench", suite: suite.name, test: test.name};
+            const results = {benchmark: benchmarkName, suite: suite.name, test: test.name};
             xhr.send(JSON.stringify(results));
         }
 
@@ -19,7 +21,7 @@
             const xhr = new XMLHttpRequest();
             xhr.open("POST", "/TestComplete");
             xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            const results = {benchmark: "StyleBench", suite: suite.name, test: test.name};
+            const results = {benchmark: benchmarkName, suite: suite.name, test: test.name};
             xhr.send(JSON.stringify(results));
         }
 
@@ -29,7 +31,7 @@
             const xhr = new XMLHttpRequest();
             xhr.open("POST", "/IterationComplete");
             xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            const results = {benchmark: "StyleBench", results: measuredValues};
+            const results = {benchmark: benchmarkName, results: measuredValues};
             xhr.send(JSON.stringify(results));
         }
 
@@ -39,7 +41,7 @@
             const xhr = new XMLHttpRequest();
             xhr.open("POST", "/BenchmarkComplete");
             xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            xhr.send(JSON.stringify({benchmark: "StyleBench"}));
+            xhr.send(JSON.stringify({benchmark: benchmarkName}));
         }
     }
 })();
