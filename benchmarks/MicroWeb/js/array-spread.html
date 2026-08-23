@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- spread of a 10-element array into a literal -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    run: (data, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += [...data, i].length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

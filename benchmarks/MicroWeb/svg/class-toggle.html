@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- toggle a class on one of 100 attached paths, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 50,
+    setup: () => {
+    const style = document.createElement("style");
+    style.textContent = ".highlight { stroke: crimson; stroke-width: 3px; }";
+    document.head.appendChild(style);
+    return makeSVG(100);
+},
+    mutate: (svg, k) => {
+    svg.children[(k * 7) % 100].classList.toggle("highlight");
+},
+});
+</script>
+</body>
+</html>

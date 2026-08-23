@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<!-- append + remove one item while a 2000-rule sheet is active, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 20,
+    setup: () => {
+    let css = "";
+    for (let i = 0; i < 2000; i++)
+        css += ".bulk-" + i + " .inner { color: rgb(" + (i % 255) + ", 10, 10); }\n";
+    injectStyleOnce("big-sheet", css);
+    return buildList(200);
+},
+    mutate: (list, k) => {
+    if (k & 1)
+        list.lastElementChild.remove();
+    else
+        list.appendChild(makeListItem(1000 + k, false));
+},
+});
+</script>
+</body>
+</html>

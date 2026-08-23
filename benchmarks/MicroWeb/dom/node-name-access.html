@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- nodeName getter -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => document.createElement("div"),
+    run: (el, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += el.nodeName.length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<!-- toggle float:left on one of 100 boxes with text, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 30,
+    setup: () => {
+    sandbox().textContent = "";
+    const container = document.createElement("div");
+    container.style.width = "600px";
+    for (let i = 0; i < 100; i++) {
+        const box = document.createElement("div");
+        box.textContent = "box " + i + " with some text inside it";
+        box.style.width = "120px";
+        container.appendChild(box);
+    }
+    sandbox().appendChild(container);
+    return container;
+},
+    mutate: (container, k) => {
+    const box = container.children[(k * 7) % 100];
+    box.style.cssFloat = box.style.cssFloat === "left" ? "" : "left";
+},
+});
+</script>
+</body>
+</html>

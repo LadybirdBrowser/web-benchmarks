@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<!-- getTotalLength + getPointAtLength of a 30-point path (the d3 measurement pattern) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 500,
+    setup: () => {
+    const svg = makeSVG(1);
+    const path = svg.querySelector("path");
+    path.setAttribute("d", wigglyPathData(7, 30));
+    forceLayout();
+    return path;
+},
+    run: (path, iters) => {
+    if (!path.getTotalLength())
+        throw new Error("getTotalLength returned 0; unsupported here, so there is nothing meaningful to measure");
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const length = path.getTotalLength();
+        acc += path.getPointAtLength(length * ((i & 15) / 16)).x;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- checkbox.checked toggle on a detached input -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => {
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    return input;
+},
+    run: (input, iters) => {
+    for (let i = 0; i < iters; i++)
+        input.checked = !input.checked;
+},
+});
+</script>
+</body>
+</html>

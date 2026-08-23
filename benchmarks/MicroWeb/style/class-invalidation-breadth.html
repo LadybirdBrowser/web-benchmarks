@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- toggle a container class that restyles all 500 descendants, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => {
+    injectStyleOnce("breadth", ".flip li label { color: seagreen; letter-spacing: 1px; }");
+    return buildList(500);
+},
+    mutate: (list, k) => {
+    list.classList.toggle("flip");
+},
+});
+</script>
+</body>
+</html>

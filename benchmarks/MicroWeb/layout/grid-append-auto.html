@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- append one auto-placed item to a 400-cell grid, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 30,
+    setup: () => makeGrid(20, 400),
+    mutate: (container, k) => {
+    const item = document.createElement("div");
+    item.className = "grid-item";
+    item.textContent = String(k % 10);
+    container.appendChild(item);
+},
+});
+</script>
+</body>
+</html>

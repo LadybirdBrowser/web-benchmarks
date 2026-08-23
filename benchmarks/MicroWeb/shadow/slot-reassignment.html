@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<!-- append + remove a light-DOM child of a host with a <slot> -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => {
+    sandbox().textContent = "";
+    const host = document.createElement("div");
+    host.attachShadow({ mode: "open" }).innerHTML = "<div class=\"wrap\"><slot></slot></div>";
+    sandbox().appendChild(host);
+    return { host, child: document.createElement("span") };
+},
+    run: (ctx, iters) => {
+    for (let i = 0; i < iters; i++) {
+        ctx.host.appendChild(ctx.child);
+        ctx.child.remove();
+    }
+},
+});
+</script>
+</body>
+</html>

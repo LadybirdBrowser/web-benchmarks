@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- URLSearchParams build + read + serialize -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const params = new URLSearchParams("a=1&b=two&c=3");
+        params.set("page", String(i & 63));
+        acc += params.get("b").length + params.toString().length;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

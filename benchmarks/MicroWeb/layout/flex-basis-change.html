@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<!-- change one item's inline flex-basis in a 200-item flex row, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 30,
+    setup: () => makeFlexContainer(200),
+    mutate: (container, k) => {
+    container.children[(k * 37) % 200].style.flexBasis = (40 + (k & 31)) + "px";
+},
+});
+</script>
+</body>
+</html>

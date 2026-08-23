@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- push into a fresh array, 1000 elements per round -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const a = [];
+        for (let j = 0; j < 1000; j++)
+            a.push(j);
+        acc += a.length;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

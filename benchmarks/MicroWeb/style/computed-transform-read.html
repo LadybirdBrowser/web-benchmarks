@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- getComputedStyle().transform of a transformed element -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => {
+    const el = document.createElement("div");
+    el.style.transform = "translate(10px, 20px) scale(1.5)";
+    sandbox().appendChild(el);
+    return el;
+},
+    run: (el, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += getComputedStyle(el).transform.length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

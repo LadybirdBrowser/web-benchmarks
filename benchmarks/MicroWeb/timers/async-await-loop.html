@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<!-- await of an already-resolved promise in a 1000-iteration loop -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1,
+    run: async () => {
+    let acc = 0;
+    for (let i = 0; i < 1000; i++)
+        acc += await Promise.resolve(1);
+    if (acc !== 1000) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

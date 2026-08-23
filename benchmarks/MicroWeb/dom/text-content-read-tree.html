@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- textContent read over a 1000-node detached tree -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 500,
+    setup: () => makeDetachedTree(1000),
+    run: (tree, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += tree.textContent.length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

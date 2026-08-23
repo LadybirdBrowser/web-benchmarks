@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<!-- insertAdjacentHTML beforeend of one item, growing then resetting a list -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => ({ list: buildList(0), counter: 0 }),
+    run: (ctx, iters) => {
+    for (let i = 0; i < iters; i++) {
+        if (ctx.list.children.length > 200)
+            ctx.list.textContent = "";
+        ctx.list.insertAdjacentHTML("beforeend", listItemHTML(i, false));
+    }
+},
+});
+</script>
+</body>
+</html>

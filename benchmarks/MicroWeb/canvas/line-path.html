@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<!-- one polyline of many lineTo segments, stroked once -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5,
+    setup: () => {
+    const ctx = canvas2d();
+    ctx.strokeStyle = "#993366";
+    return ctx;
+},
+    run: (ctx, iters) => {
+    for (let r = 0; r < iters; r++) {
+        ctx.beginPath();
+        for (let i = 0; i < 5000; i++)
+            ctx.lineTo((i * 17) % 800, (i * 43) % 600);
+        ctx.stroke();
+    }
+},
+});
+</script>
+</body>
+</html>

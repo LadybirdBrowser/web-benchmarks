@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- RegExp.test with a class-like pattern -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => /^todo-(item|list)-[0-9]+$/,
+    run: (re, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += re.test(i & 1 ? "todo-item-42" : "not-a-match") ? 1 : 0;
+    if (acc !== iters >> 1) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

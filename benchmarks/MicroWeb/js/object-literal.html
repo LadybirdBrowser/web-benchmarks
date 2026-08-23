@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<!-- object literal creation with 5 properties -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 100000,
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const o = { id: i, title: "t", completed: false, priority: i & 3, tags: null };
+        acc += o.id;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

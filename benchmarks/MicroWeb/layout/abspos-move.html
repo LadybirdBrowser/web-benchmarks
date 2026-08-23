@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<!-- move an absolutely positioned box over a 200-item list, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 50,
+    setup: () => {
+    const list = buildList(200);
+    const box = document.createElement("div");
+    box.style.cssText = "position: absolute; width: 50px; height: 50px; background: tomato;";
+    sandbox().appendChild(box);
+    return box;
+},
+    mutate: (box, k) => {
+    box.style.left = (k & 63) + "px";
+    box.style.top = ((k * 7) & 63) + "px";
+},
+});
+</script>
+</body>
+</html>

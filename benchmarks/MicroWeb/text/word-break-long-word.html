@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<!-- reflow an unbroken 5000-char word under word-break: break-all -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => {
+    sandbox().textContent = "";
+    const p = document.createElement("p");
+    p.style.cssText = "width: 600px; word-break: break-all;";
+    p.textContent = "abcdefghij".repeat(500);
+    sandbox().appendChild(p);
+    return p;
+},
+    mutate: (p, k) => {
+    p.style.width = k & 1 ? "500px" : "600px";
+},
+});
+</script>
+</body>
+</html>

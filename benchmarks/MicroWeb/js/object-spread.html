@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- object spread copying 5 properties plus one override -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => ({ id: 1, title: "t", completed: false, priority: 2, tags: null }),
+    run: (base, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const o = { ...base, completed: !!(i & 1) };
+        acc += o.id;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

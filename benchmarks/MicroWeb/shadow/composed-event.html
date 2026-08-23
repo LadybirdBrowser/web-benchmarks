@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<!-- composed bubbling event dispatched from inside a shadow tree -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => {
+    sandbox().textContent = "";
+    const host = document.createElement("div");
+    const shadow = host.attachShadow({ mode: "open" });
+    const inner = document.createElement("button");
+    shadow.appendChild(inner);
+    sandbox().appendChild(host);
+    let count = 0;
+    host.addEventListener("x-ev", () => count++);
+    return inner;
+},
+    run: (inner, iters) => {
+    for (let i = 0; i < iters; i++)
+        inner.dispatchEvent(new CustomEvent("x-ev", { bubbles: true, composed: true }));
+},
+});
+</script>
+</body>
+</html>

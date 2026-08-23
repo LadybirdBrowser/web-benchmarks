@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<!-- change the innermost text of a 100-deep nested block tree, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 30,
+    setup: () => {
+    sandbox().textContent = "";
+    let parent = sandbox();
+    for (let i = 0; i < 100; i++) {
+        const div = document.createElement("div");
+        div.style.paddingLeft = "1px";
+        parent.appendChild(div);
+        parent = div;
+    }
+    return parent;
+},
+    mutate: (innermost, k) => {
+    innermost.textContent = "depth 100, edit " + k;
+},
+});
+</script>
+</body>
+</html>

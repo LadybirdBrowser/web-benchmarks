@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- append one row to a 200x5 table, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 30,
+    setup: () => makeTable(200, 5),
+    mutate: (table, k) => {
+    const tr = document.createElement("tr");
+    for (let c = 0; c < 5; c++) {
+        const td = document.createElement("td");
+        td.textContent = "new" + c;
+        tr.appendChild(td);
+    }
+    table.tBodies[0].appendChild(tr);
+},
+});
+</script>
+</body>
+</html>

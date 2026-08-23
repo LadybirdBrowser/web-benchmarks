@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<!-- outerHTML serialization of a 100-item list -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 500,
+    setup: () => {
+    const el = document.createElement("div");
+    el.innerHTML = "<ul>" + listHTML(100) + "</ul>";
+    return el;
+},
+    run: (el, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += el.outerHTML.length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- getElementsByClassName + iterate the live collection (200 hits) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => buildList(200),
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const collection = document.getElementsByClassName("toggle");
+        for (let j = 0; j < collection.length; j++)
+            acc += collection[j].nodeType;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

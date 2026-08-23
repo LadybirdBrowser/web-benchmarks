@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<!-- drawImage from another canvas with 2x scaling -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => {
+    const source = document.createElement("canvas");
+    source.width = 100;
+    source.height = 100;
+    const sourceContext = source.getContext("2d");
+    sourceContext.fillStyle = "#284";
+    sourceContext.fillRect(0, 0, 100, 100);
+    return { ctx: canvas2d(), source };
+},
+    run: (c, iters) => {
+    for (let i = 0; i < iters; i++)
+        c.ctx.drawImage(c.source, (i * 13) % 500, (i * 7) % 300, 200, 200);
+},
+});
+</script>
+</body>
+</html>

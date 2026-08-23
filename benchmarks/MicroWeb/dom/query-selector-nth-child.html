@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- querySelector('li:nth-child(i) .toggle') for every i, like the Speedometer3 driver -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1,
+    setup: () => buildList(300),
+    run: (ctx, iters) => {
+    let found = 0;
+    for (let i = 1; i <= 300; i++) {
+        if (document.querySelector(`li:nth-child(${i}) .toggle`))
+            found++;
+    }
+    if (found !== 300) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

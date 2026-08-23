@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<!-- in-operator and delete through Proxy traps -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => new Proxy({}, {
+    has(target, key) { return key in target; },
+    deleteProperty(target, key) { delete target[key]; return true; },
+    set(target, key, value) { target[key] = value; return true; },
+}),
+    run: (proxy, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        proxy.x = i;
+        acc += "x" in proxy ? 1 : 0;
+        delete proxy.x;
+    }
+    if (acc !== iters) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

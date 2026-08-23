@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<!-- change one cell's text in a 200x5 table, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 30,
+    setup: () => makeTable(200, 5),
+    mutate: (table, k) => {
+    const rows = table.tBodies[0].rows;
+    rows[(k * 37) % 200].cells[k % 5].textContent = "edited " + k;
+},
+});
+</script>
+</body>
+</html>

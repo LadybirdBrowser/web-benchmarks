@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<!-- getAttribute of an existing attribute -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => {
+    const el = document.createElement("div");
+    el.setAttribute("data-x", "hello");
+    return el;
+},
+    run: (el, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += el.getAttribute("data-x").length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

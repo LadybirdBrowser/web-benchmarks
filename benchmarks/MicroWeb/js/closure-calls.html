@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<!-- creating and calling a closure over a local -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 100000,
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const add = (x) => x + i;
+        acc += add(1);
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

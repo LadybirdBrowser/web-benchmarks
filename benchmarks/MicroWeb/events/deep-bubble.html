@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<!-- bubbling custom event through a 30-deep ancestor chain -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => {
+    sandbox().textContent = "";
+    let parent = sandbox();
+    for (let i = 0; i < 30; i++) {
+        const div = document.createElement("div");
+        parent.appendChild(div);
+        parent = div;
+    }
+    let count = 0;
+    sandbox().addEventListener("x-deep", () => count++);
+    return parent;
+},
+    run: (leaf, iters) => {
+    for (let i = 0; i < iters; i++)
+        leaf.dispatchEvent(new CustomEvent("x-deep", { bubbles: true }));
+},
+});
+</script>
+</body>
+</html>

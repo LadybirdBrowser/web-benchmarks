@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- isConnected + contains checks across a 200-item list -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => {
+    const list = buildList(200);
+    return { list, detached: document.createElement("li") };
+},
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const item = ctx.list.children[i % 200];
+        acc += (item.isConnected ? 1 : 0) + (ctx.list.contains(item) ? 1 : 0) + (ctx.list.contains(ctx.detached) ? 1 : 0);
+    }
+    if (acc !== iters * 2) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

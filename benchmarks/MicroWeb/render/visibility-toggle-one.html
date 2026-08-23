@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<!-- toggle visibility:hidden on one item, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 50,
+    setup: () => buildList(500),
+    mutate: (list, k) => {
+    const item = list.children[(k * 37) % 500];
+    item.style.visibility = item.style.visibility === "hidden" ? "" : "hidden";
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<!-- append one new item to a 500-item list, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 50,
+    setup: () => buildList(500),
+    mutate: (list, k) => {
+    list.appendChild(makeListItem(1000 + k, false));
+},
+});
+</script>
+</body>
+</html>

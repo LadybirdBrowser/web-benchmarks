@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<!-- classList.contains over a 4-class element -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => {
+    const el = document.createElement("div");
+    el.className = "alpha beta gamma delta";
+    return el;
+},
+    run: (el, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += el.classList.contains(i & 1 ? "delta" : "nope") ? 1 : 0;
+    if (acc !== iters >> 1) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

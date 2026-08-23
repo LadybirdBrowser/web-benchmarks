@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<!-- new CSSStyleSheet + replaceSync of 500 rules -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 10,
+    setup: () => {
+    let css = "";
+    for (let i = 0; i < 500; i++)
+        css += ".constructed-" + i + " { color: rgb(0, " + (i % 255) + ", 0); }\n";
+    return css;
+},
+    run: (css, iters) => {
+    for (let i = 0; i < iters; i++) {
+        const sheet = new CSSStyleSheet();
+        sheet.replaceSync(css);
+        if (sheet.cssRules.length !== 500) throw new Error("bad result");
+    }
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<!-- replace the first word of a 200-sentence paragraph, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 20,
+    setup: () => makeParagraph(200),
+    mutate: (p, k) => {
+    const text = p.firstChild;
+    text.replaceData(0, 3, k & 1 ? "One" : "The");
+},
+});
+</script>
+</body>
+</html>

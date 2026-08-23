@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<!-- append 100 items one by one, forcing layout once at the end of each batch -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 5,
+    setup: () => { const list = buildList(0); return list; },
+    mutate: (list, k) => {
+    for (let i = 0; i < 100; i++)
+        list.appendChild(makeListItem(k * 100 + i, false));
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<!-- alternate the list container's width, then force layout (invalidates every line) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 20,
+    setup: () => buildList(500),
+    mutate: (list, k) => {
+    list.style.width = k & 1 ? "80%" : "90%";
+},
+});
+</script>
+</body>
+</html>

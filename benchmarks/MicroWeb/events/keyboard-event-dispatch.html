@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<!-- keydown + keyup dispatch on an input, like the Speedometer3 driver typing -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 10000,
+    setup: () => {
+    sandbox().textContent = "";
+    const input = document.createElement("input");
+    sandbox().appendChild(input);
+    let count = 0;
+    input.addEventListener("keyup", () => count++);
+    return input;
+},
+    run: (input, iters) => {
+    for (let i = 0; i < iters; i++) {
+        input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+        input.dispatchEvent(new KeyboardEvent("keyup", { key: "Enter", bubbles: true }));
+    }
+},
+});
+</script>
+</body>
+</html>

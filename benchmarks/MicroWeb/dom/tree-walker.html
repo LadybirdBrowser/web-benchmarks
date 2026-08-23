@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- TreeWalker traversal of a 1000-node tree -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 500,
+    setup: () => makeDetachedTree(1000),
+    run: (tree, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const walker = document.createTreeWalker(tree, NodeFilter.SHOW_ELEMENT);
+        while (walker.nextNode())
+            acc++;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

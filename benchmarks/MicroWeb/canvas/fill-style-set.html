@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<!-- fillStyle assignment from rgba() and hex strings -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => canvas2d(),
+    run: (ctx, iters) => {
+    for (let i = 0; i < iters; i++)
+        ctx.fillStyle = i & 1 ? "rgba(54, 162, 235, 0.5)" : "#abcdef";
+},
+});
+</script>
+</body>
+</html>

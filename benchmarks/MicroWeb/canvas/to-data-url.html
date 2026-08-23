@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<!-- toDataURL of a 100x100 canvas -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50,
+    setup: () => {
+    sandbox().textContent = "";
+    const canvas = document.createElement("canvas");
+    canvas.width = 100;
+    canvas.height = 100;
+    sandbox().appendChild(canvas);
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#123456";
+    ctx.fillRect(0, 0, 100, 100);
+    return canvas;
+},
+    run: (canvas, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += canvas.toDataURL().length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

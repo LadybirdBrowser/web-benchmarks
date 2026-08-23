@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<!-- textContent setter on a detached element -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => document.createElement("div"),
+    run: (el, iters) => {
+    for (let i = 0; i < iters; i++)
+        el.textContent = "value " + (i & 15);
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- getElementById in a document with a 200-element list -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => {
+    buildList(200);
+    const el = document.createElement("div");
+    el.id = "needle";
+    sandbox().appendChild(el);
+},
+    run: (ctx, iters) => {
+    for (let i = 0; i < iters; i++)
+        document.getElementById("needle");
+},
+});
+</script>
+</body>
+</html>

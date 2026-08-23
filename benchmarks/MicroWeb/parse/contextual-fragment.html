@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- Range.createContextualFragment of a list item -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => {
+    const range = document.createRange();
+    range.selectNodeContents(document.body);
+    return range;
+},
+    run: (range, iters) => {
+    for (let i = 0; i < iters; i++)
+        range.createContextualFragment(listItemHTML(i, false));
+},
+});
+</script>
+</body>
+</html>

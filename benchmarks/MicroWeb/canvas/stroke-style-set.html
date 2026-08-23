@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<!-- strokeStyle assignment from rgb() strings -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => canvas2d(),
+    run: (ctx, iters) => {
+    for (let i = 0; i < iters; i++)
+        ctx.strokeStyle = i & 1 ? "rgb(255, 99, 132)" : "rgb(54, 162, 235)";
+},
+});
+</script>
+</body>
+</html>

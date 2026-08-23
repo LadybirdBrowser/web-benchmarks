@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<!-- select a word in contenteditable and toggle bold via execCommand, 50 toggles -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1,
+    setup: () => {
+    sandbox().textContent = "";
+    const editor = document.createElement("div");
+    editor.contentEditable = "true";
+    editor.textContent = "some words to make bold repeatedly";
+    sandbox().appendChild(editor);
+    editor.focus();
+    return editor;
+},
+    run: (editor, iters) => {
+    const selection = getSelection();
+    for (let i = 0; i < 50; i++) {
+        const range = document.createRange();
+        range.selectNodeContents(editor);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        document.execCommand("bold");
+        document.execCommand("bold");
+        editor.normalize();
+    }
+},
+});
+</script>
+</body>
+</html>

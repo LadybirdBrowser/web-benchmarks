@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<!-- className setter with alternating values -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => document.createElement("div"),
+    run: (el, iters) => {
+    for (let i = 0; i < iters; i++)
+        el.className = i & 1 ? "a b c" : "a b";
+},
+});
+</script>
+</body>
+</html>

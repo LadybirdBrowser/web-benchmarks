@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<!-- setAttribute('d') with a 30-point path on a detached path element -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => document.createElementNS(SVG_NS, "path"),
+    run: (path, iters) => {
+    for (let i = 0; i < iters; i++)
+        path.setAttribute("d", wigglyPathData(i, 30));
+},
+});
+</script>
+</body>
+</html>

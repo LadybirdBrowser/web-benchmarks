@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<!-- calling a prototype method through a 2-level chain -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 100000,
+    setup: () => {
+    class Base { value() { return 1; } }
+    class Derived extends Base {}
+    return new Derived();
+},
+    run: (obj, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += obj.value();
+    if (acc !== iters) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

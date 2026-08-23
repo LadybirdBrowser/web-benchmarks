@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<!-- id setter with cycling values on a detached element -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => document.createElement("div"),
+    run: (el, iters) => {
+    for (let i = 0; i < iters; i++)
+        el.id = "x" + (i & 7);
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<!-- bezierCurveTo path of 50 segments, stroked -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1000,
+    setup: () => {
+    const ctx = canvas2d();
+    ctx.strokeStyle = "#735";
+    return ctx;
+},
+    run: (ctx, iters) => {
+    for (let i = 0; i < iters; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, 300);
+        for (let j = 0; j < 50; j++)
+            ctx.bezierCurveTo(j * 16, (j * 31 + i) % 600, j * 16 + 5, (j * 17) % 600, j * 16 + 10, 300);
+        ctx.stroke();
+    }
+},
+});
+</script>
+</body>
+</html>

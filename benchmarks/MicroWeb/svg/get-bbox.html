@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<!-- getBBox of paths in a settled 100-path SVG -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => {
+    const svg = makeSVG(100);
+    forceLayout();
+    return svg;
+},
+    run: (svg, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += svg.children[i % 100].getBBox().width;
+    if (acc < 0) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

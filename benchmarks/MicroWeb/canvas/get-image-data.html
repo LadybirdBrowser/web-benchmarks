@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<!-- getImageData of a 10x10 region -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 500,
+    setup: () => {
+    const ctx = canvas2d();
+    ctx.fillRect(0, 0, 100, 100);
+    return ctx;
+},
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += ctx.getImageData(0, 0, 10, 10).data.length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

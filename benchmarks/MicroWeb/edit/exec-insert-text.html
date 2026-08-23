@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<!-- execCommand insertText into a focused contenteditable, 200 chars per round -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1,
+    setup: () => {
+    sandbox().textContent = "";
+    const editor = document.createElement("div");
+    editor.contentEditable = "true";
+    editor.style.cssText = "width: 600px; min-height: 40px;";
+    sandbox().appendChild(editor);
+    editor.focus();
+    return editor;
+},
+    run: (editor, iters) => {
+    for (let i = 0; i < 200; i++)
+        document.execCommand("insertText", false, "x");
+    if (!editor.textContent.includes("x")) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

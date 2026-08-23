@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<!-- change opacity on one item, then force layout (should not need layout) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 50,
+    setup: () => buildList(500),
+    mutate: (list, k) => {
+    list.children[(k * 37) % 500].style.opacity = k & 1 ? "0.5" : "1";
+},
+});
+</script>
+</body>
+</html>

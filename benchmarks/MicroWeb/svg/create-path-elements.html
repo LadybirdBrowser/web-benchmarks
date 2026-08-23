@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<!-- create and append 100 fresh paths, then force layout (the render pattern) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 5,
+    setup: () => makeSVG(0),
+    mutate: (svg, k) => {
+    svg.textContent = "";
+    for (let i = 0; i < 100; i++) {
+        const path = document.createElementNS(SVG_NS, "path");
+        path.setAttribute("d", wigglyPathData(k * 100 + i, 30));
+        path.setAttribute("stroke", "steelblue");
+        path.setAttribute("fill", "none");
+        svg.appendChild(path);
+    }
+},
+});
+</script>
+</body>
+</html>

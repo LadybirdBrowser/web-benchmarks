@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<!-- change the container's font-size, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => buildList(200),
+    mutate: (list, k) => {
+    list.style.fontSize = k & 1 ? "18px" : "16px";
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<!-- replace a 200-item list's innerHTML, then force layout (the jQuery TodoMVC pattern) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => buildList(200),
+    mutate: (list, k) => {
+    list.innerHTML = listHTML(200, k % 200);
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<!-- parseFloat + parseInt + Number() of numeric strings -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += parseFloat("3.14159") + parseInt("42", 10) + Number("2.718" + (i & 7));
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

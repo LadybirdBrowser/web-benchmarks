@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- chain of 1000 queueMicrotask hops -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1,
+    run: () => new Promise((resolve) => {
+    let remaining = 1000;
+    const hop = () => {
+        if (--remaining === 0)
+            resolve();
+        else
+            queueMicrotask(hop);
+    };
+    queueMicrotask(hop);
+}),
+});
+</script>
+</body>
+</html>

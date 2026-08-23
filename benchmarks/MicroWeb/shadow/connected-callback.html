@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<!-- append + remove of a custom element with connected/disconnected callbacks -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => {
+    if (!customElements.get("x-conn")) {
+        customElements.define("x-conn", class extends HTMLElement {
+            connectedCallback() { this.on = true; }
+            disconnectedCallback() { this.on = false; }
+        });
+    }
+    sandbox().textContent = "";
+    return document.createElement("x-conn");
+},
+    run: (el, iters) => {
+    for (let i = 0; i < iters; i++) {
+        sandbox().appendChild(el);
+        el.remove();
+    }
+},
+});
+</script>
+</body>
+</html>

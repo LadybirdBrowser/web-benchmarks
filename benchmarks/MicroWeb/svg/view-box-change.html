@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<!-- alternate the viewBox of a 100-path SVG, then force layout (the zoom-extent pattern) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => makeSVG(100),
+    mutate: (svg, k) => {
+    svg.setAttribute("viewBox", k & 1 ? "0 0 300 150" : "0 0 600 300");
+},
+});
+</script>
+</body>
+</html>

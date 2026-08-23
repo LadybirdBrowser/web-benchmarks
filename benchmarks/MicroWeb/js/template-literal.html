@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<!-- template literal interpolation -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 100000,
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += `value ${i & 255} of ${iters}`.length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

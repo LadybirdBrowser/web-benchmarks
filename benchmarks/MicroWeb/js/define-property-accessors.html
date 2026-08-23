@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<!-- Object.defineProperty installing an accessor pair (Vue 2 reactivity) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const obj = {};
+        let backing = i;
+        Object.defineProperty(obj, "x", {
+            get() { return backing; },
+            set(v) { backing = v; },
+        });
+        acc += obj.x & 1;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

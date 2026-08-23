@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<!-- rewrite transform on all 100 attached paths, then force layout (the pan pattern) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 20,
+    setup: () => makeSVG(100),
+    mutate: (svg, k) => {
+    const paths = svg.children;
+    for (let i = 0; i < paths.length; i++)
+        paths[i].setAttribute("transform", "translate(" + (k & 15) + ", " + (i & 7) + ")");
+},
+});
+</script>
+</body>
+</html>

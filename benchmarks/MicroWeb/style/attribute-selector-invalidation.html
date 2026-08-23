@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<!-- toggle an attribute watched by an attribute selector, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 30,
+    setup: () => {
+    injectStyleOnce("attr-rule", "li[data-state=\"on\"] { background: #eef; } li[data-state=\"on\"] label { font-style: italic; }");
+    return buildList(200);
+},
+    mutate: (list, k) => {
+    const item = list.children[(k * 37) % 200];
+    item.setAttribute("data-state", item.getAttribute("data-state") === "on" ? "off" : "on");
+},
+});
+</script>
+</body>
+</html>

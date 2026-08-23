@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- innerText read of a 200-item list after a small mutation (forces layout per read) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50,
+    setup: () => buildList(200),
+    run: (list, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        list.children[i % 200].classList.toggle("completed");
+        acc += list.innerText.length;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

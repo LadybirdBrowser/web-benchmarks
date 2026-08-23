@@ -67,6 +67,7 @@ class BenchmarkHTTPRequestHandler(SimpleHTTPRequestHandler):
             json_data = json.loads(post_data.decode('utf-8'))
             self.server.current_test = "/".join(filter(None, (json_data["benchmark"], json_data["suite"], json_data["test"])))
             self.server.phase = "running"
+            print(f"Started '{self.server.current_test}'")
             self.send_response(200)
             self.end_headers()
 
@@ -75,16 +76,21 @@ class BenchmarkHTTPRequestHandler(SimpleHTTPRequestHandler):
             post_data = self.rfile.read(content_length)
             json_data = json.loads(post_data.decode('utf-8'))
             test_name = "/".join(filter(None, (json_data["benchmark"], json_data["suite"], json_data["test"])))
-            print(f"Iteration {self.server.iteration_count}: Completed '{test_name}'")
+            print(f"Completed '{test_name}'")
             self.send_response(200)
             self.end_headers()
 
         elif self.path == "/IterationComplete":
-            self.server.iteration_count += 1
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             json_data = json.loads(post_data.decode('utf-8'))
             append_table_data(json_data["benchmark"], json_data["results"])
+            self.send_response(200)
+            self.end_headers()
+
+        elif self.path == "/Heartbeat":
+            # Sent by suites whose individual tests can legitimately run longer than the
+            # stall timeout; receiving any POST already refreshed last_progress_time.
             self.send_response(200)
             self.end_headers()
 
@@ -109,7 +115,6 @@ class BenchmarkHTTPRequestHandler(SimpleHTTPRequestHandler):
 def start_http_server():
     server = HTTPServer(('localhost', 0), BenchmarkHTTPRequestHandler)
     server.running_ladybird_process = None
-    server.iteration_count = 1
     server.last_progress_time = time.monotonic()
     server.current_test = None
     server.phase = "startup"
@@ -128,17 +133,30 @@ def start_http_server():
     return server
 
 
-def run_benchmark(benchmark_path, runner_url, benchmark_params, ladybird_arguments, timeout, verbose=False):
+def profile_directory_for(browser):
+    # Snap-confined Chromium cannot read /tmp or hidden directories in $HOME, so its
+    # profile has to live inside the snap's own writable area.
+    if browser == "chromium":
+        snap_common = Path.home() / "snap" / "chromium" / "common"
+        if snap_common.is_dir():
+            return tempfile.TemporaryDirectory(prefix="benchmark-profile-", dir=snap_common)
+    return tempfile.TemporaryDirectory(prefix="ladybird-benchmark-profile-")
+
+
+def run_benchmark(benchmark_path, runner_url, benchmark_params, ladybird_arguments, timeout, verbose=False, browser="ladybird"):
     current_dir = os.getcwd()
     os.chdir(benchmark_path)
     server = start_http_server()
-    profile = tempfile.TemporaryDirectory(prefix="ladybird-benchmark-profile-")
+    profile = profile_directory_for(browser)
 
     query = urlencode(benchmark_params)
     _, port = server.server_address
     url = urlunparse(("http", f"localhost:{port}", runner_url, "", query, ""))
 
-    ladybird_cmd = ladybird_arguments + ["--profile-path", profile.name, url]
+    if browser == "chromium":
+        ladybird_cmd = ladybird_arguments + [f"--user-data-dir={profile.name}", url]
+    else:
+        ladybird_cmd = ladybird_arguments + ["--profile-path", profile.name, url]
 
     try:
         if verbose:
@@ -192,6 +210,7 @@ def run_benchmark(benchmark_path, runner_url, benchmark_params, ladybird_argumen
 
 def main():
     available_benchmarks = {
+        "MicroWeb": { "runner_url": "index.html", "timeout": 30, "split_by_directory": True },
         "Speedometer2": { "runner_url": "index.html" },
         "Speedometer3": { "runner_url": "index.html" },
         "StyleBench": { "runner_url": "index.html" },
@@ -211,6 +230,9 @@ def main():
     parser.add_argument("--output", "-o", default="results.json", help="JSON output file name.")
     parser.add_argument("--timeout", type=float, help="Per-test timeout in seconds; the browser is killed if no test completes within this time (0 to disable)")
     parser.add_argument("--verbose", "-v", action="store_true", help="Show stdout and stderr output from the browser")
+    parser.add_argument("--browser", choices=["ladybird", "chromium"], default="ladybird", help="Which browser the executable is; chromium gets Chromium-appropriate arguments")
+    parser.add_argument("--jitless", action="store_true", help="Chromium only: disable the V8 JIT for a fairer engine comparison")
+    parser.add_argument("--split-suites", action="store_true", help="Launch a fresh browser per test category (for suites that support it), keeping session-aging effects out of individual results")
 
     args = parser.parse_args()
 
@@ -230,9 +252,16 @@ def main():
         print(f"Error: Executable '{args.executable}' not found.", file=sys.stderr)
         sys.exit(1)
 
-    ladybird_arguments = [args.executable]
-    if not args.show_window:
-        ladybird_arguments += ["--headless=manual"]
+    if args.browser == "chromium":
+        ladybird_arguments = [args.executable, "--no-first-run", "--no-default-browser-check", "--disable-background-networking"]
+        if args.jitless:
+            ladybird_arguments += ["--js-flags=--jitless"]
+        if not args.show_window:
+            ladybird_arguments += ["--headless=new", "--window-size=1200,900"]
+    else:
+        ladybird_arguments = [args.executable]
+        if not args.show_window:
+            ladybird_arguments += ["--headless=manual"]
 
     benchmarks_dir = Path(__file__).parent / "benchmarks"
 
@@ -247,7 +276,16 @@ def main():
             print(f"Benchmark '{benchmark}' not found in benchmarks directory.", file=sys.stderr)
             sys.exit(1)
         server_root = benchmarks_dir / available_benchmarks[benchmark].get("server_root", benchmark)
-        if not run_benchmark(server_root, runner_url, params, ladybird_arguments, timeout, verbose=args.verbose):
+        if args.split_suites and available_benchmarks[benchmark].get("split_by_directory"):
+            categories = sorted(
+                entry.name for entry in benchmark_path.iterdir()
+                if entry.is_dir() and entry.name != "resources")
+            for category in categories:
+                category_params = params + [("category", category)]
+                if not run_benchmark(server_root, runner_url, category_params, ladybird_arguments, timeout, verbose=args.verbose, browser=args.browser):
+                    if benchmark not in failed_benchmarks:
+                        failed_benchmarks.append(benchmark)
+        elif not run_benchmark(server_root, runner_url, params, ladybird_arguments, timeout, verbose=args.verbose, browser=args.browser):
             failed_benchmarks.append(benchmark)
 
     test_times_data = []

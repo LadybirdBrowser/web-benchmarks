@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- define() upgrading 200 existing elements, unique tag each round -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20,
+    run: (ctx, iters) => {
+    for (let i = 0; i < iters; i++) {
+        window.__upgradeCounter = (window.__upgradeCounter || 0) + 1;
+        const tag = "x-up-" + window.__upgradeCounter;
+        sandbox().textContent = "";
+        for (let j = 0; j < 200; j++)
+            sandbox().appendChild(document.createElement(tag));
+        customElements.define(tag, class extends HTMLElement {
+            connectedCallback() { this.upgraded = true; }
+        });
+    }
+},
+});
+</script>
+</body>
+</html>

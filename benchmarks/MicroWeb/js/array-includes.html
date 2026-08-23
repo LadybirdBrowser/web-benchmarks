@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- Array includes + indexOf over a 100-element array -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => Array.from({ length: 100 }, (unused, i) => "item" + i),
+    run: (data, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += (data.includes("item99") ? 1 : 0) + data.indexOf("item" + (i & 63));
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

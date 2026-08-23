@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- calling a function with spread arguments -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 100000,
+    setup: () => ({ args: [1, 2, 3, 4, 5], fn: (a, b, c, d, e) => a + b + c + d + e }),
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += ctx.fn(...ctx.args);
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

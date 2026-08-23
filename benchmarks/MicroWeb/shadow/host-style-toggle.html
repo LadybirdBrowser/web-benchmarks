@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<!-- toggle a class on a shadow host with :host(.on) styling, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 30,
+    setup: () => {
+    sandbox().textContent = "";
+    const hosts = [];
+    for (let i = 0; i < 100; i++) {
+        const host = document.createElement("div");
+        const shadow = host.attachShadow({ mode: "open" });
+        shadow.innerHTML = "<style>:host { display: block; } :host(.on) span { color: crimson; font-weight: bold; }</style><span>item " + i + "</span>";
+        sandbox().appendChild(host);
+        hosts.push(host);
+    }
+    return hosts;
+},
+    mutate: (hosts, k) => {
+    hosts[(k * 7) % 100].classList.toggle("on");
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<!-- history.replaceState with a small state object -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 30,
+    run: (ctx, iters) => {
+    for (let i = 0; i < iters; i++)
+        history.replaceState({ page: i & 63 }, "", "?page=" + (i & 63));
+},
+});
+</script>
+</body>
+</html>

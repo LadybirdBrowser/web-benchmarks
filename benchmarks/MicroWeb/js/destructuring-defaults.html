@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- object destructuring with defaults in a function signature -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 100000,
+    setup: () => ({ fn: ({ id, title = "untitled", completed = false } = {}) => (completed ? 0 : id) }),
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += ctx.fn({ id: i });
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

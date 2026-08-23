@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- select a whole 200-item list and read Selection.toString() -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 100,
+    setup: () => {
+    const list = buildList(200);
+    return { list, selection: getSelection() };
+},
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        ctx.selection.selectAllChildren(ctx.list);
+        acc += ctx.selection.toString().length;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

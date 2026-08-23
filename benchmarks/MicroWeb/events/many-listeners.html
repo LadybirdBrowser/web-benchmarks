@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- dispatch to a target with 10 listeners for the event -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => {
+    const el = document.createElement("div");
+    for (let i = 0; i < 10; i++)
+        el.addEventListener("x-ev", () => {});
+    return el;
+},
+    run: (el, iters) => {
+    for (let i = 0; i < iters; i++)
+        el.dispatchEvent(new CustomEvent("x-ev"));
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- indexed iteration over a 200-element static NodeList -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => {
+    buildList(200);
+    return document.querySelectorAll("li");
+},
+    run: (nodeList, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        for (let j = 0; j < nodeList.length; j++)
+            acc += nodeList[j].nodeType;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

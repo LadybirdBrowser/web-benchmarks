@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- Set add/has/delete over a cycling key space -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => new Set(),
+    run: (set, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const key = i & 255;
+        set.add(key);
+        acc += set.has(key) ? 1 : 0;
+        if (i & 1)
+            set.delete(key);
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- change a position:relative item's left offset, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 50,
+    setup: () => {
+    const list = buildList(200);
+    const item = list.children[100];
+    item.style.position = "relative";
+    return item;
+},
+    mutate: (item, k) => {
+    item.style.left = (k & 15) + "px";
+},
+});
+</script>
+</body>
+</html>

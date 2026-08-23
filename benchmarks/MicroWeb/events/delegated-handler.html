@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<!-- delegation: container click handler resolving event.target.closest('.destroy') -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => {
+    const list = buildList(100);
+    let count = 0;
+    list.addEventListener("click", (event) => {
+        if (event.target.closest(".destroy"))
+            count++;
+    });
+    return list.querySelectorAll(".destroy");
+},
+    run: (buttons, iters) => {
+    for (let i = 0; i < iters; i++)
+        buttons[i % buttons.length].click();
+},
+});
+</script>
+</body>
+</html>

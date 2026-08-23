@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<!-- set 20 labels to never-seen-before strings, then force layout (shaping cache miss) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 20,
+    setup: () => buildList(100),
+    mutate: (list, k) => {
+    for (let i = 0; i < 20; i++)
+        list.children[i].querySelector("label").textContent = uniqueString();
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<!-- Range.extractContents + insertNode putting the content back -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 300,
+    setup: () => {
+    sandbox().textContent = "";
+    const p = document.createElement("p");
+    p.textContent = "extract a slice of this sentence and put it back";
+    sandbox().appendChild(p);
+    return p;
+},
+    run: (p, iters) => {
+    for (let i = 0; i < iters; i++) {
+        const range = document.createRange();
+        range.setStart(p.firstChild, 8);
+        range.setEnd(p.firstChild, 15);
+        const fragment = range.extractContents();
+        range.insertNode(fragment);
+        p.normalize();
+    }
+},
+});
+</script>
+</body>
+</html>

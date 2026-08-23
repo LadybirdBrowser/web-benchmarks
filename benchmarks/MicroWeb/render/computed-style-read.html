@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<!-- getComputedStyle().display over a settled 200-item list -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => {
+    const list = buildList(200);
+    forceLayout();
+    return list;
+},
+    run: (list, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += getComputedStyle(list.children[i % 200]).display.length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

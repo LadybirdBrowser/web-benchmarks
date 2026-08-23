@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>MicroWeb single test</title>
+<p>Loading</p>
+<iframe width="800" height="600"></iframe>
+<script>
+// Debug driver for one test page: single.html?test=dom/create-element.html&iterationCount=5
+// Shows the values inline and, when opened under run.py-style harnesses, POSTs nothing.
+// With ?post=1 it POSTs {path, values | error} to /Results for scripted use.
+const parameters = new URLSearchParams(location.search);
+const testPath = parameters.get("test");
+const iterationCount = parameters.get("iterationCount") || "3";
+const frame = document.querySelector("iframe");
+const status = document.querySelector("p");
+
+frame.src = `${testPath}?iterationCount=${iterationCount}`;
+const startTime = performance.now();
+const timer = setInterval(async () => {
+    const state = frame.contentWindow.__webKitPerfTestState;
+    let result = null;
+    if (state && state.error)
+        result = { path: testPath, error: String(state.error) };
+    else if (state && state.done)
+        result = { path: testPath, values: state.values };
+    else if (performance.now() - startTime > 30000)
+        result = { path: testPath, error: "timed out" };
+    if (!result)
+        return;
+    clearInterval(timer);
+    status.textContent = JSON.stringify(result);
+    document.title = "done";
+    if (parameters.get("post"))
+        await fetch("/Results", { method: "POST", body: JSON.stringify(result) });
+}, 25);
+</script>

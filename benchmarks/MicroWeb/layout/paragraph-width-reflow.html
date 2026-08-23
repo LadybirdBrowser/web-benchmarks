@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<!-- alternate the width of a 200-sentence paragraph, then force layout (full line rebuild) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => makeParagraph(200),
+    mutate: (p, k) => {
+    p.style.width = k & 1 ? "500px" : "600px";
+},
+});
+</script>
+</body>
+</html>

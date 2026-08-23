@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<!-- WeakMap get-or-create dependency tracking pattern -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => {
+    const targets = Array.from({ length: 64 }, () => ({}));
+    return { deps: new WeakMap(), targets };
+},
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const target = ctx.targets[i & 63];
+        let dep = ctx.deps.get(target);
+        if (!dep) {
+            dep = new Set();
+            ctx.deps.set(target, dep);
+        }
+        dep.add("effect" + (i & 7));
+        acc += dep.size;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

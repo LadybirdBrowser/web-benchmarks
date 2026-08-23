@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<!-- remove one item from a 500-item list, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 50,
+    setup: () => buildList(550),
+    mutate: (list, k) => {
+    list.children[(k * 37) % 500].remove();
+},
+});
+</script>
+</body>
+</html>

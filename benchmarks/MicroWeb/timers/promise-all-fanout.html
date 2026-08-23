@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- Promise.all over 1000 already-resolved promises -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1,
+    run: async () => {
+    const promises = [];
+    for (let i = 0; i < 1000; i++)
+        promises.push(Promise.resolve(i));
+    const results = await Promise.all(promises);
+    if (results.length !== 1000) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

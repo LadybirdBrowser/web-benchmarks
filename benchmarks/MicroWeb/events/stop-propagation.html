@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<!-- stopPropagation halfway up a 10-deep chain -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => {
+    sandbox().textContent = "";
+    let parent = sandbox();
+    let middle = null;
+    for (let i = 0; i < 10; i++) {
+        const div = document.createElement("div");
+        parent.appendChild(div);
+        parent = div;
+        if (i === 5)
+            middle = div;
+    }
+    middle.addEventListener("x-ev", (event) => event.stopPropagation());
+    return parent;
+},
+    run: (leaf, iters) => {
+    for (let i = 0; i < iters; i++)
+        leaf.dispatchEvent(new CustomEvent("x-ev", { bubbles: true }));
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<!-- set 20 labels to one of two known strings, then force layout (shaping cache hit) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 20,
+    setup: () => buildList(100),
+    mutate: (list, k) => {
+    const text = k & 1 ? "a well-known label text" : "the other label text";
+    for (let i = 0; i < 20; i++)
+        list.children[i].querySelector("label").textContent = text;
+},
+});
+</script>
+</body>
+</html>

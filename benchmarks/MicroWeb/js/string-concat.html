@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<!-- string += in a loop -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 100000,
+    run: (ctx, iters) => {
+    let out = "";
+    for (let i = 0; i < iters; i++)
+        out += "x";
+    if (out.length !== iters) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

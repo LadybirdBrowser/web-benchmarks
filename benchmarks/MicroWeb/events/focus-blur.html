@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- focus() alternating between two inputs -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1000,
+    setup: () => {
+    sandbox().textContent = "";
+    const first = document.createElement("input");
+    const second = document.createElement("input");
+    sandbox().appendChild(first);
+    sandbox().appendChild(second);
+    return [first, second];
+},
+    run: (inputs, iters) => {
+    for (let i = 0; i < iters; i++)
+        inputs[i & 1].focus();
+},
+});
+</script>
+</body>
+</html>

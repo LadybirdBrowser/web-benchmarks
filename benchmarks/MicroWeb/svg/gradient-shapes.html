@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<!-- 100 rects filled by one linearGradient, gradient stop recolored, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => {
+    const svg = makeSVG(0);
+    const defs = document.createElementNS(SVG_NS, "defs");
+    const gradient = document.createElementNS(SVG_NS, "linearGradient");
+    gradient.id = "shared-gradient";
+    const stop = document.createElementNS(SVG_NS, "stop");
+    stop.setAttribute("offset", "0");
+    stop.setAttribute("stop-color", "tomato");
+    gradient.appendChild(stop);
+    defs.appendChild(gradient);
+    svg.appendChild(defs);
+    for (let i = 0; i < 100; i++) {
+        const rect = document.createElementNS(SVG_NS, "rect");
+        rect.setAttribute("x", String((i % 20) * 30));
+        rect.setAttribute("y", String(Math.floor(i / 20) * 30));
+        rect.setAttribute("width", "25");
+        rect.setAttribute("height", "25");
+        rect.setAttribute("fill", "url(#shared-gradient)");
+        svg.appendChild(rect);
+    }
+    return stop;
+},
+    mutate: (stop, k) => {
+    stop.setAttribute("stop-color", k & 1 ? "steelblue" : "tomato");
+},
+});
+</script>
+</body>
+</html>

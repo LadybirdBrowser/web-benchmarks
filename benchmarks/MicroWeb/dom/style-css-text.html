@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<!-- style.cssText set with a 3-declaration block -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => document.createElement("div"),
+    run: (el, iters) => {
+    for (let i = 0; i < iters; i++)
+        el.style.cssText = "color: red; width: " + (i & 63) + "px; display: block;";
+},
+});
+</script>
+</body>
+</html>

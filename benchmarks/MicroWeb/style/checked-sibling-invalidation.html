@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<!-- toggle checkbox checkedness driving a :checked ~ sibling rule, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 30,
+    setup: () => {
+    injectStyleOnce("checked-rule", ".toggle:checked ~ label { text-decoration: line-through; color: #d9d9d9; }");
+    return buildList(200);
+},
+    mutate: (list, k) => {
+    const toggle = list.children[(k * 37) % 200].querySelector(".toggle");
+    toggle.checked = !toggle.checked;
+},
+});
+</script>
+</body>
+</html>

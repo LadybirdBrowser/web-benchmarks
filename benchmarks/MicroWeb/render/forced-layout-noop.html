@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<!-- offsetHeight with nothing invalidated: the flush floor -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 50,
+    setup: () => buildList(500),
+    mutate: () => {},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- innerHTML of a 50-row table on a detached div -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 500,
+    setup: () => {
+    let rows = "";
+    for (let i = 0; i < 50; i++)
+        rows += "<tr><td>" + i + "</td><td>name " + i + "</td><td><b>bold</b></td></tr>";
+    return { el: document.createElement("div"), markup: "<table><tbody>" + rows + "</tbody></table>" };
+},
+    run: (ctx, iters) => {
+    for (let i = 0; i < iters; i++)
+        ctx.el.innerHTML = ctx.markup;
+},
+});
+</script>
+</body>
+</html>

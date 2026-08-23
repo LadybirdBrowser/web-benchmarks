@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- 200 MessageChannel round trips -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1,
+    run: () => new Promise((resolve) => {
+    const channel = new MessageChannel();
+    let remaining = 200;
+    channel.port1.onmessage = () => channel.port1.postMessage(0);
+    channel.port2.onmessage = () => {
+        if (--remaining === 0)
+            resolve();
+        else
+            channel.port2.postMessage(0);
+    };
+    channel.port2.postMessage(0);
+}),
+});
+</script>
+</body>
+</html>

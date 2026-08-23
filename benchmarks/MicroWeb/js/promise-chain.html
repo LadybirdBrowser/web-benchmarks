@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- await through a 10-link resolved-promise chain, 100 chains per iteration -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1,
+    run: async (ctx) => {
+    let acc = 0;
+    for (let c = 0; c < 100; c++) {
+        let p = Promise.resolve(0);
+        for (let i = 0; i < 10; i++)
+            p = p.then((v) => v + 1);
+        acc += await p;
+    }
+    if (acc !== 1000) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

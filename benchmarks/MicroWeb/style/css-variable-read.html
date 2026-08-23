@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- getComputedStyle().getPropertyValue of a custom property -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => {
+    const el = document.createElement("div");
+    el.style.setProperty("--x", "42px");
+    sandbox().appendChild(el);
+    return el;
+},
+    run: (el, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += getComputedStyle(el).getPropertyValue("--x").length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

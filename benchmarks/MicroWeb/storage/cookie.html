@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<!-- document.cookie write + read -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1000,
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        document.cookie = "bench" + (i & 7) + "=value" + i + "; path=/";
+        acc += document.cookie.length;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

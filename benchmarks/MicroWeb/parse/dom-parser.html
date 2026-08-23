@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<!-- DOMParser.parseFromString of a ~15KB document -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 200,
+    setup: () => "<!DOCTYPE html><html><body><ul>" + listHTML(100) + "</ul></body></html>",
+    run: (markup, iters) => {
+    const parser = new DOMParser();
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += parser.parseFromString(markup, "text/html").body.children.length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

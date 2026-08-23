@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- JSON.stringify of a 100-item array of objects -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => Array.from({ length: 100 }, (unused, i) => ({ id: i, title: "todo " + i, completed: !(i & 1) })),
+    run: (data, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += JSON.stringify(data).length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

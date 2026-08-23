@@ -43,6 +43,28 @@ tests use fixed batch sizes and report the elapsed time for that workload, so
 faster code also shortens the benchmark run. Each suite's `Skipped` file records
 tests excluded by WebKit or by this runner.
 
+`MicroWeb` is a home-grown suite of ~230 fine-grained time-based microbenchmarks
+covering the primitives Speedometer3 exercises (DOM API, render pipeline, layout
+modes, style invalidation, text shaping, JS, canvas, SVG, parsing, shadow DOM,
+events, editing, observers, timers, URL/history, storage). See
+`benchmarks/MicroWeb/README.md` for the comparison workflow against Chromium.
+
+To run any benchmark under Chromium for comparison, pass `--browser chromium`
+(and typically `--jitless`, which disables the V8 JIT for an engine-vs-engine
+comparison):
+
+```bash
+./run.py --executable /snap/bin/chromium --browser chromium --jitless \
+    --benchmarks MicroWeb -o chromium.json
+```
+
+`ratios.py` then ranks every test by the subject/reference time multiplier,
+worst first:
+
+```bash
+./ratios.py --subject ladybird.json --reference chromium.json
+```
+
 ## Comparing Results
 
 After running benchmarks and saving the results as a JSON file, you can compare the results using the `compare.py` 

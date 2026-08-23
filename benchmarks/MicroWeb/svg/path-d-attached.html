@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<!-- rewrite the 'd' of all 100 attached paths, then force layout (the zoom pattern) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => makeSVG(100),
+    mutate: (svg, k) => {
+    const paths = svg.children;
+    for (let i = 0; i < paths.length; i++)
+        paths[i].setAttribute("d", wigglyPathData(k * 100 + i, 30));
+},
+});
+</script>
+</body>
+</html>

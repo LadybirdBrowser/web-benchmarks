@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- change a custom property on the container feeding 300 var() consumers, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => {
+    injectStyleOnce("var-rule", ".todo-list { --accent: rgb(10, 20, 30); } .todo-list li label { color: var(--accent); }");
+    return buildList(300);
+},
+    mutate: (list, k) => {
+    list.style.setProperty("--accent", k & 1 ? "rgb(200, 30, 30)" : "rgb(30, 30, 200)");
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<!-- innerHTML of one 5-element list item on a detached div -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => document.createElement("div"),
+    run: (el, iters) => {
+    for (let i = 0; i < iters; i++)
+        el.innerHTML = '<li class="x"><div class="view"><input class="toggle" type="checkbox"><label>hello world ' + (i & 7) + '</label><button class="destroy"></button></div></li>';
+},
+});
+</script>
+</body>
+</html>

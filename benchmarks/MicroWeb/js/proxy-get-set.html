@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- property get + set through a Proxy with forwarding traps -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => new Proxy({ count: 0 }, {
+    get(target, key) { return target[key]; },
+    set(target, key, value) { target[key] = value; return true; },
+}),
+    run: (proxy, iters) => {
+    for (let i = 0; i < iters; i++)
+        proxy.count = proxy.count + 1;
+    if (proxy.count !== iters) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

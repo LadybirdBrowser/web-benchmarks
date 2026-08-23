@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- CSSOM insertRule + deleteRule on a live sheet -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => {
+    const style = document.createElement("style");
+    style.textContent = ".base-rule { color: black; }";
+    document.head.appendChild(style);
+    return style.sheet;
+},
+    run: (sheet, iters) => {
+    for (let i = 0; i < iters; i++) {
+        sheet.insertRule(".dynamic-rule { color: rgb(" + (i % 255) + ", 0, 0); }", 0);
+        sheet.deleteRule(0);
+    }
+},
+});
+</script>
+</body>
+</html>

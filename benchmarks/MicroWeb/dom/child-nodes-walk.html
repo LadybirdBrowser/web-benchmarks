@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- firstChild/nextSibling walk over 1000 children -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => makeDetachedTree(1000),
+    run: (tree, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        for (let node = tree.firstChild; node; node = node.nextSibling)
+            acc++;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

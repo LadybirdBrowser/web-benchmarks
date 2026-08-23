@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- fillText of short labels -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => {
+    const ctx = canvas2d();
+    ctx.font = "12px sans-serif";
+    ctx.fillStyle = "#222222";
+    return ctx;
+},
+    run: (ctx, iters) => {
+    for (let i = 0; i < iters; i++)
+        ctx.fillText("label " + (i & 31), (i * 61) % 700, (i * 37) % 580);
+},
+});
+</script>
+</body>
+</html>

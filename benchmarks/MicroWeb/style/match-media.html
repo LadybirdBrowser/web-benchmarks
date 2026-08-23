@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<!-- matchMedia evaluation with a varying width query -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += window.matchMedia("(max-width: " + (2000 + (i & 255)) + "px)").matches ? 1 : 0;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

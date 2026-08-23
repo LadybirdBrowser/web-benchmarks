@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- putImageData of a 100x100 block -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1000,
+    setup: () => {
+    const ctx = canvas2d();
+    ctx.fillStyle = "#446688";
+    ctx.fillRect(0, 0, 100, 100);
+    return { ctx, block: ctx.getImageData(0, 0, 100, 100) };
+},
+    run: (c, iters) => {
+    for (let i = 0; i < iters; i++)
+        c.ctx.putImageData(c.block, (i * 13) % 200, (i * 7) % 200);
+},
+});
+</script>
+</body>
+</html>

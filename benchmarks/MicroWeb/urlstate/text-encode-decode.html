@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- TextEncoder.encode + TextDecoder.decode of a 1KB string -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => ({ encoder: new TextEncoder(), decoder: new TextDecoder(), text: "hello wörld ünïcode ".repeat(50) }),
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += ctx.decoder.decode(ctx.encoder.encode(ctx.text)).length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

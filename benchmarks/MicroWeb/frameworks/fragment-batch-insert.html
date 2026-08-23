@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- DocumentFragment built with 100 items, appended in one shot -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 100,
+    setup: () => buildList(0),
+    run: (list, iters) => {
+    for (let i = 0; i < iters; i++) {
+        list.textContent = "";
+        const fragment = document.createDocumentFragment();
+        for (let j = 0; j < 100; j++)
+            fragment.appendChild(makeListItem(j, false));
+        list.appendChild(fragment);
+    }
+},
+});
+</script>
+</body>
+</html>

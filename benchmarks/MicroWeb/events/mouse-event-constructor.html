@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<!-- new MouseEvent with an init dictionary -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    run: (ctx, iters) => {
+    for (let i = 0; i < iters; i++)
+        new MouseEvent("click", { bubbles: true, cancelable: true, clientX: i & 255, clientY: i & 127 });
+},
+});
+</script>
+</body>
+</html>

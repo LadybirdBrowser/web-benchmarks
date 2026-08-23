@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<!-- accessor property read+write -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 100000,
+    setup: () => ({
+    _x: 0,
+    get x() { return this._x; },
+    set x(v) { this._x = v; },
+}),
+    run: (obj, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        obj.x = i;
+        acc += obj.x & 1;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

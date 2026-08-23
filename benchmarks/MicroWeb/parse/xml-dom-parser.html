@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<!-- DOMParser.parseFromString of a ~10KB XML document -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 200,
+    setup: () => {
+    let items = "";
+    for (let i = 0; i < 100; i++)
+        items += "<item id=\"" + i + "\"><title>todo " + i + "</title><completed>" + (i & 1 ? "yes" : "no") + "</completed></item>";
+    return "<?xml version=\"1.0\"?><list>" + items + "</list>";
+},
+    run: (markup, iters) => {
+    const parser = new DOMParser();
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += parser.parseFromString(markup, "application/xml").documentElement.children.length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

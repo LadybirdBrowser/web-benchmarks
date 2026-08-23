@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<!-- capture listener at root plus bubble listener at leaf, 10-deep chain -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 10000,
+    setup: () => {
+    sandbox().textContent = "";
+    let parent = sandbox();
+    for (let i = 0; i < 10; i++) {
+        const div = document.createElement("div");
+        parent.appendChild(div);
+        parent = div;
+    }
+    let count = 0;
+    sandbox().addEventListener("x-ev", () => count++, { capture: true });
+    parent.addEventListener("x-ev", () => count++);
+    return parent;
+},
+    run: (leaf, iters) => {
+    for (let i = 0; i < iters; i++)
+        leaf.dispatchEvent(new CustomEvent("x-ev", { bubbles: true }));
+},
+});
+</script>
+</body>
+</html>

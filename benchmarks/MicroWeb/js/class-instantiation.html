@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<!-- new of a small class with a constructor -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 100000,
+    setup: () => class Todo {
+    constructor(id, title) {
+        this.id = id;
+        this.title = title;
+        this.completed = false;
+    }
+},
+    run: (Todo, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += new Todo(i, "t").id;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

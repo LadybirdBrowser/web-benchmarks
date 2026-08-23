@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- template.content.cloneNode(true) of a 10-node item template -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => {
+    const template = document.createElement("template");
+    template.innerHTML = '<li class="item"><div class="view"><input class="toggle" type="checkbox"><label>text</label><button class="destroy"></button></div></li>';
+    return template;
+},
+    run: (template, iters) => {
+    for (let i = 0; i < iters; i++)
+        template.content.cloneNode(true);
+},
+});
+</script>
+</body>
+</html>

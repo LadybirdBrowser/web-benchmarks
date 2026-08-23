@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- global replace over a 1000-char string -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 10000,
+    setup: () => "the quick brown fox ".repeat(50),
+    run: (s, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += s.replace(/quick/g, "slow").length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

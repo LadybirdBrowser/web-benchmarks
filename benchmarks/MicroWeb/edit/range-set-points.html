@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<!-- createRange + setStart/setEnd across a 200-item list -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => buildList(200),
+    run: (list, iters) => {
+    for (let i = 0; i < iters; i++) {
+        const range = document.createRange();
+        range.setStart(list.children[i % 200], 0);
+        range.setEnd(list.children[(i + 5) % 200], 0);
+    }
+},
+});
+</script>
+</body>
+</html>

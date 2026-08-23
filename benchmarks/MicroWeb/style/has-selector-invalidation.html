@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- toggle a class watched by a :has() rule, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 20,
+    setup: () => {
+    injectStyleOnce("has-rule", ".todo-list:has(.selected) { background: #fffbe6; } .todo-list:has(.selected) li { border-left: 2px solid gold; }");
+    return buildList(200);
+},
+    mutate: (list, k) => {
+    list.children[(k * 37) % 200].classList.toggle("selected");
+},
+});
+</script>
+</body>
+</html>

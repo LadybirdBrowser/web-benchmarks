@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- 100 independent setTimeout(0) callbacks scheduled at once -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1,
+    run: () => new Promise((resolve) => {
+    let remaining = 100;
+    for (let i = 0; i < 100; i++) {
+        setTimeout(() => {
+            if (--remaining === 0)
+                resolve();
+        }, 0);
+    }
+}),
+});
+</script>
+</body>
+</html>

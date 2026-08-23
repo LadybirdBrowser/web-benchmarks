@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<!-- querySelector inside a 100-element shadow root -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => {
+    sandbox().textContent = "";
+    const host = document.createElement("div");
+    const shadow = host.attachShadow({ mode: "open" });
+    let markup = "";
+    for (let i = 0; i < 100; i++)
+        markup += "<div class=\"row r" + (i % 10) + "\">row " + i + "</div>";
+    shadow.innerHTML = markup;
+    shadow.lastElementChild.classList.add("needle");
+    sandbox().appendChild(host);
+    return shadow;
+},
+    run: (shadow, iters) => {
+    let found = 0;
+    for (let i = 0; i < iters; i++)
+        found += shadow.querySelector(".needle") ? 1 : 0;
+    if (found !== iters) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

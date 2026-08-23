@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<!-- append + remove a <style> with 500 class rules, forcing style each time -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 10,
+    setup: () => {
+    buildList(100);
+    let css = "";
+    for (let i = 0; i < 500; i++)
+        css += ".generated-" + i + " { color: rgb(" + (i % 255) + ", 0, 0); padding-left: " + (i % 7) + "px; }\n";
+    return css;
+},
+    run: (css, iters) => {
+    for (let i = 0; i < iters; i++) {
+        const style = document.createElement("style");
+        style.textContent = css;
+        document.head.appendChild(style);
+        forceLayout();
+        style.remove();
+        forceLayout();
+    }
+},
+});
+</script>
+</body>
+</html>

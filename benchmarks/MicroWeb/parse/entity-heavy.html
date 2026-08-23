@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- innerHTML with many character entities and attributes -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 300,
+    setup: () => {
+    let markup = "";
+    for (let i = 0; i < 20; i++)
+        markup += "<p title=\"caf&eacute; &amp; r&eacute;sum&eacute; " + i + "\">&lt;tag&gt; &quot;quoted&quot; &copy; &mdash; &nbsp; text</p>";
+    return { el: document.createElement("div"), markup };
+},
+    run: (ctx, iters) => {
+    for (let i = 0; i < iters; i++)
+        ctx.el.innerHTML = ctx.markup;
+},
+});
+</script>
+</body>
+</html>

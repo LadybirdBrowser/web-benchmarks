@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- throw + catch of an Error -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        try {
+            if (i >= 0)
+                throw new Error("expected");
+        } catch (e) {
+            acc++;
+        }
+    }
+    if (acc !== iters) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

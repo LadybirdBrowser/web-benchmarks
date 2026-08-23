@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- split on comma then join, 100 fields -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => Array.from({ length: 100 }, (unused, i) => "field" + i).join(","),
+    run: (s, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += s.split(",").join(";").length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

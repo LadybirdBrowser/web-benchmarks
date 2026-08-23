@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- constructing a Path2D of 100 segments and filling it -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1000,
+    setup: () => canvas2d(),
+    run: (ctx, iters) => {
+    for (let i = 0; i < iters; i++) {
+        const path = new Path2D();
+        for (let j = 0; j < 100; j++)
+            path.lineTo((j * 17 + i) % 800, (j * 43) % 600);
+        path.closePath();
+        ctx.fill(path);
+    }
+},
+});
+</script>
+</body>
+</html>

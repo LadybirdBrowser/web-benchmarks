@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- localStorage setItem + getItem of small values -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => localStorage.clear(),
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        localStorage.setItem("key" + (i & 31), "value " + i);
+        acc += localStorage.getItem("key" + (i & 31)).length;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

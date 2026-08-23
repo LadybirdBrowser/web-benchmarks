@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<!-- widen one cell, which re-sizes its whole table column, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 20,
+    setup: () => makeTable(200, 5),
+    mutate: (table, k) => {
+    table.tBodies[0].rows[0].cells[2].style.width = k & 1 ? "150px" : "50px";
+},
+});
+</script>
+</body>
+</html>

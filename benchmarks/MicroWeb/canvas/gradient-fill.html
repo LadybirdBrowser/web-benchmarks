@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- createLinearGradient + fillRect -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => canvas2d(),
+    run: (ctx, iters) => {
+    for (let i = 0; i < iters; i++) {
+        const gradient = ctx.createLinearGradient(0, 0, 100, 100);
+        gradient.addColorStop(0, "#ff0000");
+        gradient.addColorStop(1, "#0000ff");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 100, 100);
+    }
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<!-- Range.surroundContents wrapping text in a span, then unwrapping -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 300,
+    setup: () => {
+    sandbox().textContent = "";
+    const p = document.createElement("p");
+    p.textContent = "wrap some of this text in a span repeatedly";
+    sandbox().appendChild(p);
+    return p;
+},
+    run: (p, iters) => {
+    for (let i = 0; i < iters; i++) {
+        const range = document.createRange();
+        range.setStart(p.firstChild, 5);
+        range.setEnd(p.firstChild, 9);
+        const span = document.createElement("span");
+        range.surroundContents(span);
+        span.replaceWith(...span.childNodes);
+        p.normalize();
+    }
+},
+});
+</script>
+</body>
+</html>

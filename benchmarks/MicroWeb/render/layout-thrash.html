@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- interleaved class writes and offsetHeight reads (25 write+read pairs per cycle) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 4,
+    setup: () => buildList(500),
+    mutate: (list, k) => {
+    for (let i = 0; i < 25; i++) {
+        list.children[(k * 25 + i) % 500].classList.toggle("hidden-item");
+        forceLayout();
+    }
+},
+});
+</script>
+</body>
+</html>

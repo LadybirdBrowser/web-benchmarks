@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<!-- async delivery of a 200-mutation batch to a MutationObserver callback -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50,
+    setup: () => {
+    const list = buildList(200);
+    return list;
+},
+    run: async (list, iters) => {
+    for (let i = 0; i < iters; i++) {
+        let received = 0;
+        const delivered = new Promise((resolve) => {
+            const observer = new MutationObserver((records) => {
+                received = records.length;
+                observer.disconnect();
+                resolve();
+            });
+            observer.observe(list, { childList: true, attributes: true, subtree: true });
+        });
+        for (let j = 0; j < 200; j++)
+            list.children[j].setAttribute("data-v", String(i));
+        await delivered;
+        if (received !== 200) throw new Error("bad result");
+    }
+},
+});
+</script>
+</body>
+</html>

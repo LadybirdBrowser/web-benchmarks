@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- element.closest from a leaf to a list-root selector -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => {
+    buildList(50);
+    return document.querySelector(".toggle");
+},
+    run: (el, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += el.closest(".todo-list") ? 1 : 0;
+    if (acc !== iters) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

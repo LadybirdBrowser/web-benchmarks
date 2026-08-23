@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- slice of a 1000-char string -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 100000,
+    setup: () => "abcdefghij".repeat(100),
+    run: (s, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += s.slice(i & 255, (i & 255) + 100).length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

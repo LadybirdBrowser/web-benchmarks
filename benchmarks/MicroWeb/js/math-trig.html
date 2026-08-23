@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<!-- sin/cos/sqrt/atan2 loop, the chart-projection diet -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += Math.sin(i * 0.01) + Math.cos(i * 0.02) + Math.sqrt(i & 1023) + Math.atan2(i & 63, 7);
+    if (acc === 0) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

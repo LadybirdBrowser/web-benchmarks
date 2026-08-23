@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<!-- instantiate 100 <use> references to a defs symbol, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => {
+    const svg = makeSVG(0);
+    const defs = document.createElementNS(SVG_NS, "defs");
+    const group = document.createElementNS(SVG_NS, "g");
+    group.id = "shared-shape";
+    const path = document.createElementNS(SVG_NS, "path");
+    path.setAttribute("d", "M0,0L10,10L20,0Z");
+    path.setAttribute("fill", "steelblue");
+    group.appendChild(path);
+    defs.appendChild(group);
+    svg.appendChild(defs);
+    return svg;
+},
+    mutate: (svg, k) => {
+    while (svg.children.length > 1)
+        svg.lastElementChild.remove();
+    for (let i = 0; i < 100; i++) {
+        const use = document.createElementNS(SVG_NS, "use");
+        use.setAttribute("href", "#shared-shape");
+        use.setAttribute("x", String((i % 20) * 30));
+        use.setAttribute("y", String(Math.floor(i / 20) * 30));
+        svg.appendChild(use);
+    }
+},
+});
+</script>
+</body>
+</html>

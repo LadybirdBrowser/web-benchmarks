@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<!-- offsetTop over a settled 200-item list -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => {
+    const list = buildList(200);
+    forceLayout();
+    return list;
+},
+    run: (list, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += list.children[i % 200].offsetTop;
+    if (acc === 0) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

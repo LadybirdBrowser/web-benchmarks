@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<!-- createElement of a defined custom element (constructor runs) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => {
+    if (!customElements.get("x-item")) {
+        customElements.define("x-item", class extends HTMLElement {
+            constructor() {
+                super();
+                this.todo = null;
+            }
+        });
+    }
+},
+    run: (ctx, iters) => {
+    for (let i = 0; i < iters; i++)
+        document.createElement("x-item");
+},
+});
+</script>
+</body>
+</html>

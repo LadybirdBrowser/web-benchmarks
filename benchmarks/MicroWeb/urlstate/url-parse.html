@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<!-- new URL of an absolute URL with query and fragment -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += new URL("https://example.com/articles/section/" + (i & 63) + "?page=2&sort=asc#comments").pathname.length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

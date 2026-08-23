@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<!-- innerHTML of a ~15KB 100-item list on a detached div -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 200,
+    setup: () => ({ el: document.createElement("div"), markup: "<ul>" + listHTML(100) + "</ul>" }),
+    run: (ctx, iters) => {
+    for (let i = 0; i < iters; i++)
+        ctx.el.innerHTML = ctx.markup;
+},
+});
+</script>
+</body>
+</html>

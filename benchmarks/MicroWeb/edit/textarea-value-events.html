@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<!-- textarea value append + input event, 200 keystrokes per round -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5,
+    setup: () => {
+    sandbox().textContent = "";
+    const textarea = document.createElement("textarea");
+    sandbox().appendChild(textarea);
+    let count = 0;
+    textarea.addEventListener("input", () => count++);
+    return textarea;
+},
+    run: (textarea, iters) => {
+    for (let r = 0; r < iters; r++) {
+        textarea.value = "";
+        for (let i = 0; i < 200; i++) {
+            textarea.value += "x";
+            textarea.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+    }
+},
+});
+</script>
+</body>
+</html>

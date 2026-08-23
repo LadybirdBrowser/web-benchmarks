@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<!-- for-of over an object with a hand-written Symbol.iterator -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => ({
+    [Symbol.iterator]() {
+        let i = 0;
+        return { next: () => (i < 100 ? { value: i++, done: false } : { value: undefined, done: true }) };
+    },
+}),
+    run: (iterable, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        for (const value of iterable)
+            acc += value;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- keyed list diff-apply: move 50 items to new positions via insertBefore -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 150,
+    setup: () => buildList(100),
+    run: (list, iters) => {
+    for (let i = 0; i < iters; i++) {
+        for (let j = 0; j < 50; j++)
+            list.insertBefore(list.children[(j * 13 + i) % 100], list.children[(j * 7) % 100]);
+    }
+},
+});
+</script>
+</body>
+</html>

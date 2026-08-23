@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<!-- cloneNode(true) of a 100-node tree -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 500,
+    setup: () => makeDetachedTree(100),
+    run: (tree, iters) => {
+    for (let i = 0; i < iters; i++)
+        tree.cloneNode(true);
+},
+});
+</script>
+</body>
+</html>

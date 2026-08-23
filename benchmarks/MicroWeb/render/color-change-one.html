@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<!-- change color on one item, then force layout (paint-only property) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 50,
+    setup: () => buildList(500),
+    mutate: (list, k) => {
+    list.children[(k * 37) % 500].style.color = k & 1 ? "rgb(200, 0, 0)" : "rgb(0, 0, 200)";
+},
+});
+</script>
+</body>
+</html>

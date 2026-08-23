@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<!-- clone a template and fill its slots by query + textContent (the Lit render shape) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => {
+    const template = document.createElement("template");
+    template.innerHTML = '<li class="item"><div class="view"><input class="toggle" type="checkbox"><label class="title"></label><span class="count"></span></div></li>';
+    return template;
+},
+    run: (template, iters) => {
+    for (let i = 0; i < iters; i++) {
+        const instance = template.content.cloneNode(true);
+        instance.querySelector(".title").textContent = "todo " + (i & 63);
+        instance.querySelector(".count").textContent = String(i & 7);
+        instance.querySelector(".toggle").checked = !!(i & 1);
+    }
+},
+});
+</script>
+</body>
+</html>

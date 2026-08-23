@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<!-- click() on a button with one listener, bubbling through 3 ancestors -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => {
+    sandbox().textContent = "";
+    const a = document.createElement("div");
+    const b = document.createElement("div");
+    const button = document.createElement("button");
+    a.appendChild(b);
+    b.appendChild(button);
+    sandbox().appendChild(a);
+    let count = 0;
+    button.addEventListener("click", () => count++);
+    return button;
+},
+    run: (button, iters) => {
+    for (let i = 0; i < iters; i++)
+        button.click();
+},
+});
+</script>
+</body>
+</html>

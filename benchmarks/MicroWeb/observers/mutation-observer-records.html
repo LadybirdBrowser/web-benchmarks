@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<!-- 200 observed attribute mutations + takeRecords -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 100,
+    setup: () => {
+    const list = buildList(200);
+    const observer = new MutationObserver(() => {});
+    observer.observe(list, { attributes: true, subtree: true });
+    return { list, observer };
+},
+    run: (ctx, iters) => {
+    for (let i = 0; i < iters; i++) {
+        for (let j = 0; j < 200; j++)
+            ctx.list.children[j].setAttribute("data-v", String(i));
+        if (ctx.observer.takeRecords().length !== 200) throw new Error("bad result");
+    }
+},
+});
+</script>
+</body>
+</html>

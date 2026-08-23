@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<!-- Selection collapse + extend across list items -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => {
+    const list = buildList(100);
+    return { list, selection: getSelection() };
+},
+    run: (ctx, iters) => {
+    for (let i = 0; i < iters; i++) {
+        const label = ctx.list.children[i % 100].querySelector("label");
+        ctx.selection.collapse(label.firstChild, 0);
+        ctx.selection.extend(label.firstChild, 5);
+    }
+},
+});
+</script>
+</body>
+</html>

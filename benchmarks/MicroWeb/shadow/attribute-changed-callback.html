@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<!-- setAttribute on an observed attribute of a custom element -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => {
+    if (!customElements.get("x-attr")) {
+        customElements.define("x-attr", class extends HTMLElement {
+            static get observedAttributes() { return ["data-x"]; }
+            attributeChangedCallback(name, oldValue, newValue) { this.last = newValue; }
+        });
+    }
+    return document.createElement("x-attr");
+},
+    run: (el, iters) => {
+    for (let i = 0; i < iters; i++)
+        el.setAttribute("data-x", "v" + (i & 7));
+},
+});
+</script>
+</body>
+</html>

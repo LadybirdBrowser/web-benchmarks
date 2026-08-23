@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<!-- change one item's grid-column in a 20x20 grid, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 30,
+    setup: () => makeGrid(20, 400),
+    mutate: (container, k) => {
+    container.children[(k * 37) % 400].style.gridColumn = String(1 + (k % 20));
+},
+});
+</script>
+</body>
+</html>

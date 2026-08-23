@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<!-- toggle display:none on one item of a 2000-item list: does cost scale with document size? -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => buildList(2000),
+    mutate: (list, k) => {
+    list.children[(k * 37) % 2000].classList.toggle("hidden-item");
+},
+});
+</script>
+</body>
+</html>

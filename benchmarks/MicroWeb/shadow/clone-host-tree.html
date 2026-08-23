@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<!-- cloneNode(true) of a tree with 100 custom-element hosts -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 200,
+    setup: () => {
+    if (!customElements.get("x-clone")) {
+        customElements.define("x-clone", class extends HTMLElement {
+            constructor() { super(); this.data = null; }
+        });
+    }
+    const root = document.createElement("div");
+    for (let i = 0; i < 100; i++) {
+        const host = document.createElement("x-clone");
+        host.textContent = "item " + i;
+        root.appendChild(host);
+    }
+    return root;
+},
+    run: (root, iters) => {
+    for (let i = 0; i < iters; i++)
+        root.cloneNode(true);
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<!-- change stroke-dasharray on all 100 paths, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 20,
+    setup: () => makeSVG(100),
+    mutate: (svg, k) => {
+    const paths = svg.children;
+    for (let i = 0; i < paths.length; i++)
+        paths[i].setAttribute("stroke-dasharray", k & 1 ? "4 2" : "8 4");
+},
+});
+</script>
+</body>
+</html>

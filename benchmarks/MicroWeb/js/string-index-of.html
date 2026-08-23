@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- indexOf near the end of a 1000-char string -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => "abcdefghij".repeat(100) + "needle",
+    run: (s, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += s.indexOf("needle");
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

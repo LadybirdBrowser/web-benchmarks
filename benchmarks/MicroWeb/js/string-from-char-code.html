@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<!-- String.fromCharCode + charCodeAt round trip -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += String.fromCharCode(65 + (i & 25)).charCodeAt(0);
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

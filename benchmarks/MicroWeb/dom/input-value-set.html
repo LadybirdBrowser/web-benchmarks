@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- input.value setter, like the Speedometer3 driver typing -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => {
+    const input = document.createElement("input");
+    sandbox().appendChild(input);
+    return input;
+},
+    run: (input, iters) => {
+    for (let i = 0; i < iters; i++)
+        input.value = "Something to buy " + (i & 63);
+},
+});
+</script>
+</body>
+</html>

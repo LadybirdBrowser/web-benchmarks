@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<!-- toggle one item's flex-basis class in a 200-item wrapping flex row, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 30,
+    setup: () => makeFlexContainer(200),
+    mutate: (container, k) => {
+    container.children[(k * 37) % 200].classList.toggle("wide");
+},
+});
+</script>
+</body>
+</html>

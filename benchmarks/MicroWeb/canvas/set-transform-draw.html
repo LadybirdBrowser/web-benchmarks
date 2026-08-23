@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- setTransform before each small fillRect -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 10000,
+    setup: () => {
+    const ctx = canvas2d();
+    ctx.fillStyle = "#357";
+    return ctx;
+},
+    run: (ctx, iters) => {
+    for (let i = 0; i < iters; i++) {
+        ctx.setTransform(1, 0, 0, 1, i & 255, (i * 3) & 255);
+        ctx.fillRect(0, 0, 4, 4);
+    }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+},
+});
+</script>
+</body>
+</html>

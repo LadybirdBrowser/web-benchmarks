@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- compareDocumentPosition-based ordering checks across a 200-item list -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 10000,
+    setup: () => buildList(200),
+    run: (list, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const a = list.children[i % 200];
+        const b = list.children[(i * 7 + 1) % 200];
+        acc += a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? 1 : 0;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

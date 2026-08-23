@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<!-- insertBefore into the middle of a 200-child detached list -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => {
+    const ul = makeDetachedTree(200);
+    return { ul, extra: document.createElement("li") };
+},
+    run: (ctx, iters) => {
+    const middle = 100;
+    for (let i = 0; i < iters; i++) {
+        ctx.ul.insertBefore(ctx.extra, ctx.ul.children[middle]);
+        ctx.extra.remove();
+    }
+},
+});
+</script>
+</body>
+</html>

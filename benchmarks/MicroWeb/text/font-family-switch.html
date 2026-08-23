@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<!-- switch the container's font-family, re-shaping 200 items, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => buildList(200),
+    mutate: (list, k) => {
+    list.style.fontFamily = k & 1 ? "serif" : "sans-serif";
+},
+});
+</script>
+</body>
+</html>

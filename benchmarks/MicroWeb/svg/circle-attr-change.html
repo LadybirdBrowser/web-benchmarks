@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<!-- move 200 scatter circles via cx/cy attributes, then force layout (the Perf-Dashboard pattern) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 20,
+    setup: () => {
+    const svg = makeSVG(0);
+    for (let i = 0; i < 200; i++) {
+        const circle = document.createElementNS(SVG_NS, "circle");
+        circle.setAttribute("r", "3");
+        circle.setAttribute("fill", "seagreen");
+        svg.appendChild(circle);
+    }
+    return svg;
+},
+    mutate: (svg, k) => {
+    const circles = svg.children;
+    for (let i = 0; i < circles.length; i++) {
+        circles[i].setAttribute("cx", String((i * 3 + k * 7) % 600));
+        circles[i].setAttribute("cy", String((i * 7919 + k) % 300));
+    }
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- sort of a 100-number array with a comparator -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const a = Array.from({ length: 100 }, (unused, j) => (j * 7919 + i) % 1000);
+        a.sort((x, y) => x - y);
+        acc += a[0];
+    }
+    if (acc < 0) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

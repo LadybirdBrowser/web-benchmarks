@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<!-- arc with both fill and stroke, like chartjs points -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => {
+    const ctx = canvas2d();
+    ctx.fillStyle = "rgba(255, 99, 132, 0.5)";
+    ctx.strokeStyle = "rgb(255, 99, 132)";
+    return ctx;
+},
+    run: (ctx, iters) => {
+    for (let i = 0; i < iters; i++) {
+        ctx.beginPath();
+        ctx.arc((i * 53) % 800, (i * 71) % 600, 3, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.stroke();
+    }
+},
+});
+</script>
+</body>
+</html>

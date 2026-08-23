@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<!-- rewrite 50 <text> labels, then force layout (the axis-label pattern) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => {
+    const svg = makeSVG(0);
+    for (let i = 0; i < 50; i++) {
+        const text = document.createElementNS(SVG_NS, "text");
+        text.setAttribute("x", String(i * 12));
+        text.setAttribute("y", "150");
+        text.textContent = "0";
+        svg.appendChild(text);
+    }
+    return svg;
+},
+    mutate: (svg, k) => {
+    const labels = svg.children;
+    for (let i = 0; i < labels.length; i++)
+        labels[i].textContent = String((k * 50 + i) % 1000);
+},
+});
+</script>
+</body>
+</html>

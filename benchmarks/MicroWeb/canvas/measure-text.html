@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<!-- measureText of short labels -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => {
+    const ctx = canvas2d();
+    ctx.font = "12px sans-serif";
+    return ctx;
+},
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += ctx.measureText("label " + (i & 31)).width;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>
