@@ -158,8 +158,8 @@ def main():
             "Old Score",
             "New Score",
             "Score Improvement",
-            "Old Total Time (ms)",
-            "New Total Time (ms)",
+            "Old Total Time (s)",
+            "New Total Time (s)",
             "Speedup"
         ],
     ))
