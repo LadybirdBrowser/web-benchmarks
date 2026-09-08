@@ -112,8 +112,12 @@ class BenchmarkHTTPRequestHandler(SimpleHTTPRequestHandler):
         pass
 
 
+class BenchmarkHTTPServer(HTTPServer):
+    request_queue_size = 128
+
+
 def start_http_server():
-    server = HTTPServer(('localhost', 0), BenchmarkHTTPRequestHandler)
+    server = BenchmarkHTTPServer(('localhost', 0), BenchmarkHTTPRequestHandler)
     server.running_ladybird_process = None
     server.last_progress_time = time.monotonic()
     server.current_test = None
