@@ -73,3 +73,14 @@ script. For example:
 ```bash
 ./compare.py -o old.json -n new.json
 ```
+
+## Measuring a Branch Before a PR
+
+`bench_pr.py` compares a Ladybird branch against its merge-base: It compiles both, runs every suite in an interleaved loop, tests the per-test differences for significance, and writes the performance section for the PR body.
+
+```bash
+cd /path/to/your-ladybird-branch
+/path/to/web-benchmarks/bench_pr.py
+```
+
+Calibrate the machine against itself once first (`--calibrate`) — so the run knows what it can resolve. `MEASURING-A-BRANCH.md` covers how to read the output, and explains what a run can and can’t detect.
