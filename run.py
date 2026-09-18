@@ -164,8 +164,7 @@ def run_benchmark(benchmark_path, runner_url, benchmark_params, ladybird_argumen
         else:
             process = subprocess.Popen(
                 ladybird_cmd,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL
+                stdout=subprocess.DEVNULL
             )
         server.running_ladybird_process = process
 
@@ -229,7 +228,7 @@ def main():
     parser.add_argument("--show-window", action="store_true", help="Show the browser window during the test run")
     parser.add_argument("--output", "-o", default="results.json", help="JSON output file name.")
     parser.add_argument("--timeout", type=float, help="Per-test timeout in seconds; the browser is killed if no test completes within this time (0 to disable)")
-    parser.add_argument("--verbose", "-v", action="store_true", help="Show stdout and stderr output from the browser")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Show browser stdout in addition to stderr")
     parser.add_argument("--browser", choices=["ladybird", "chromium"], default="ladybird", help="Which browser the executable is; chromium gets Chromium-appropriate arguments")
     parser.add_argument("--jitless", action="store_true", help="Chromium only: disable the V8 JIT for a fairer engine comparison")
     parser.add_argument("--split-suites", action="store_true", help="Launch a fresh browser per test category (for suites that support it), keeping session-aging effects out of individual results")
