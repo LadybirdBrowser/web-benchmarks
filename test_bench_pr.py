@@ -37,5 +37,20 @@ class CacheSeed(unittest.TestCase):
                 self.assertEqual(f.read(), "object")
 
 
+class RunLock(unittest.TestCase):
+    @unittest.skipIf(bench_pr.fcntl is None, "no flock on this platform")
+    def test_a_second_run_is_refused_while_the_first_holds_the_cache(self):
+        with tempfile.TemporaryDirectory() as root:
+            first, _ = bench_pr.hold_run_lock(root)
+            self.assertIsNotNone(first)
+            second, holder = bench_pr.hold_run_lock(root)
+            self.assertIsNone(second)
+            self.assertIn(f"pid {os.getpid()}", holder)
+            first.close()
+            third, _ = bench_pr.hold_run_lock(root)
+            self.assertIsNotNone(third)
+            third.close()
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

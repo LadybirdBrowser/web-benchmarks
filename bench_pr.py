@@ -23,6 +23,11 @@ import subprocess
 import sys
 import time
 
+try:
+    import fcntl
+except ImportError:  # Windows has no flock; a run there goes without the lock.
+    fcntl = None
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 # Bumped whenever the compile recipe changes, so trees made the old way are redone.
@@ -48,6 +53,28 @@ PLUS_MINUS = bench_compare.PLUS_MINUS
 
 # Progress lines must reach a redirected log as they happen, not at exit.
 sys.stdout.reconfigure(line_buffering=True)
+
+
+def hold_run_lock(root):
+    """One run at a time per cache directory: Two runs would build and measure the same worktrees under each other —
+    and each would report numbers from binaries the other swapped out. The lock lasts as long as the process, however
+    it exits. Returns the open lock file, or None and whatever the holder wrote into it."""
+    os.makedirs(root, exist_ok=True)
+    handle = open(os.path.join(root, "bench_pr.lock"), "a+")
+    if fcntl is None:
+        return handle, None
+    try:
+        fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        handle.seek(0)
+        holder = handle.read().strip() or "no details recorded"
+        handle.close()
+        return None, holder
+    handle.seek(0)
+    handle.truncate()
+    handle.write(f"pid {os.getpid()} on {platform.node()}, started {datetime.datetime.now():%Y-%m-%d %H:%M:%S}\n")
+    handle.flush()
+    return handle, None
 
 
 def sh(cmd, cwd=None, check=True, capture=True):
@@ -303,6 +330,11 @@ def main():
           f"{args.iterations} iteration(s) per launch, ETA about {eta / 60:.0f} min")
     if args.dry_run:
         return
+
+    lock, holder = hold_run_lock(bench_plan.cache_root())
+    if lock is None:
+        sys.exit(f"Refusing to run: another bench_pr.py run holds {bench_plan.cache_root()} ({holder}); its builds "
+                 "and measurements would land under this one's. Wait for it to finish.")
 
     on_ac, load1, ncpu, running, thermal = machine_state()
     machine = machine_description(ncpu)
