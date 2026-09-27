@@ -207,6 +207,18 @@ class BuildParity(unittest.TestCase):
     def test_identical_flags_pass(self):
         self.assertEqual(bench_plan.build_parity_problems({"base": self.FLAGS, "head": self.FLAGS}), [])
 
+    def test_a_tree_without_the_reference_object_blocks_even_when_the_other_matches_it(self):
+        # Two trees that both lack the reference would agree token for token; that must not count as parity.
+        for missing in (" [object:missing]", self.FLAGS + " [object:missing]"):
+            problems = bench_plan.build_parity_problems({"base": missing, "head": missing})
+            self.assertEqual(len(problems), 1, missing)
+            self.assertTrue(problems[0].blocking)
+            self.assertIn("reference", problems[0].message)
+        problems = bench_plan.build_parity_problems({"base": self.FLAGS + " [object:bitcode]",
+                                                     "head": " [object:missing]"})
+        self.assertEqual(len(problems), 1)
+        self.assertIn("head", problems[0].message)
+
     def test_an_lto_mismatch_blocks_and_names_the_flag(self):
         problems = bench_plan.build_parity_problems(
             {"base": self.FLAGS, "head": self.FLAGS.replace(" -flto=thin", "")})
