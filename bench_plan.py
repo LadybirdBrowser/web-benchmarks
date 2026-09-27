@@ -129,6 +129,12 @@ def build_parity_problems(flags_by_arm):
     token for token: the last of a repeated option wins, so the same flags in another order can be another build."""
     (a, a_flags), (b, b_flags) = sorted(flags_by_arm.items())
     a_tokens, b_tokens = a_flags.split(), b_flags.split()
+    # A tree whose reference object or compile rule can't be found gives an empty line — which would match another
+    # such tree token for token, and pass the check without comparing anything.
+    for arm, tokens in ((a, a_tokens), (b, b_tokens)):
+        if len(tokens) < 2 or "[object:missing]" in tokens:
+            return [Problem(f"The {arm} tree has no compile line or object for the reference source file, so the two "
+                            "builds can't be checked against each other.", blocking=True)]
     if a_tokens == b_tokens:
         return []
     only_a = sorted(set(a_tokens) - set(b_tokens))
