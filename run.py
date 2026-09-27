@@ -262,7 +262,9 @@ def main():
         if not args.show_window:
             ladybird_arguments += ["--headless=new", "--window-size=1200,900"]
     else:
-        ladybird_arguments = [args.executable]
+        # The WebKit suites' runner collects garbage before every test through the internals object, as it would through
+        # WebKit's GCController; without it, the collection lands inside whichever test crosses the heap's threshold.
+        ladybird_arguments = [args.executable, "--expose-internals-object"]
         if not args.show_window:
             ladybird_arguments += ["--headless=manual"]
 

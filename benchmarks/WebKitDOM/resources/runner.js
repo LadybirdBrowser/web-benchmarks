@@ -119,7 +119,9 @@ if (window.testRunner) {
     }
 
     PerfTestRunner.gc = function () {
-        if (window.GCController)
+        if (window.internals && window.internals.gc)
+            window.internals.gc();
+        else if (window.GCController)
             window.GCController.collect();
         else {
             function gcRec(n) {
@@ -222,7 +224,7 @@ if (window.testRunner) {
         }
 
         results.push(measuredValue);
-        if (window.internals && !currentTest.doNotMeasureMemoryUsage) {
+        if (window.internals && window.internals.memoryInfo && !currentTest.doNotMeasureMemoryUsage) {
             jsHeapResults.push(getUsedJSHeap());
             mallocHeapResults.push(getUsedMallocHeap());
         }
