@@ -14,10 +14,11 @@ Nothing about the section is handwritten. If the tool hasn’t run against the b
 
 - A Ladybird checkout with your branch committed. A worktree is fine.
 - The Python requirements from this repository (`pip install -r requirements.txt`). A `.venv` beside these scripts is picked up automatically.
-- About 24 minutes of an idle machine per run, plus one-off compile time for each arm the first time it sees a commit.
+- About 27 minutes of an idle machine per run (3 of them relinking), plus one-off compile time for each arm the first time it sees a commit, and a few minutes the first time each arm is relinked.
+- On Linux, lld (`ld.lld`) — so that every round can relink both arms in a fresh function order.
 - A machine plugged in to “mains” AC power. The tool refuses to start when the machine is running on battery power.
 
-Everything it writes lives under `$XDG_CACHE_HOME/ladybird-bench` (`~/.cache/ladybird-bench` by default): the two worktrees, the compile logs, one directory of raw results per run, and the calibration record.
+Everything it writes lives under `$XDG_CACHE_HOME/ladybird-bench` (`~/.cache/ladybird-bench` by default): the two worktrees, the compile and relink logs, a ThinLTO cache, one directory of raw results per run, and the calibration record.
 
 ## Calibrate the machine once
 
@@ -28,7 +29,7 @@ cd "${LADYBIRD_SOURCE_DIR}"          # a checkout on master
 /path/to/web-benchmarks/bench_pr.py --calibrate
 ```
 
-That runs the identical loop with both arms bound to the *same* compiled browser — so every difference it reports is noise. It should report no movers at all:
+That builds the one commit into both arms’ trees, and runs the identical loop — each round relinking the two in fresh function orders, exactly as a real run does. So every difference it reports is noise, layout included. It should report no movers at all:
 
 ```
 A-vs-A calibration: resolution 3.37% median, 7.67% p90 (85 sub-2ms tests left out)
@@ -37,7 +38,7 @@ false movers (should be 0): 0
 
 The resolution is the smallest true change the run could have detected, per test, at this sample size and this machine’s noise. A non-zero false-mover count means the machine is too noisy to trust at these settings; in other words, it means you need to close down some other running apps/processes, or raise `--rounds`, and calibrate again.
 
-The record is kept and consulted by later runs — which warn when it’s missing, over 30 days old, or from a different machine, benchmarks revision, or compiler configuration. Only a calibration over the whole suite battery is recorded — so a narrowed experimental one can’t overwrite it.
+The record is kept and consulted by later runs — which warn when it’s missing, over 30 days old, or from a different machine, benchmarks revision, or build configuration (a calibration made with `--fixed-layout` doesn’t vouch for a run with fresh function orders, or the other way around). Only a calibration over the whole suite battery is recorded — so a narrowed experimental one can’t overwrite it.
 
 ## Measure a branch
 
@@ -61,7 +62,7 @@ figures leave them out.
 Baseline: e6b803be8dc
 Branch: ad0ed72c4d0
 Benchmarks: c85ef85
-Build: Distribution preset, AppleClang 21.0.0.21000333, ThinLTO
+Build: Distribution preset, AppleClang 21.0.0.21000333, ThinLTO, a fresh function order per round
 Machine: Mac17,7, 18 cores, macOS 27.0
 Calibration: A-vs-A on 20260908: 0 false mover(s), resolution ±7.3% p90
 Suites: MicroWeb, Speedometer2, Speedometer3, StyleBench, ...
@@ -95,6 +96,20 @@ For each test, the run takes the log ratio of head-to-base per-round — which 
 
 That last floor exists because `performance.now()` is coarsened to 0.1ms: every measurement is a multiple of that, tests shorter than a couple of milliseconds are only a few quanta long, and a value sitting on a rounding boundary produces a perfectly-consistent one-quantum “difference” that no amount of statistics can see through. For the same reason, a test’s resolution is never quoted below one quantum of its own time — and the resolution figures in the section leave the sub-2ms tests out.
 
+## Each round gets a fresh function order
+
+Where the linker puts each function decides which functions share a cache line, an instruction-cache set, or a branch-predictor entry. In a ThinLTO build, a change anywhere moves every function placed after it — so a branch can make a test it never touches several percent faster or slower. That’s not hypothetical: For a branch that changed only RegExp code, `WebKitCSS/CSSPropertyUpdateValue` and `WebKitCSS/CSSPropertySetterGetter` flagged on Linux as 8.5% and 10.9% slowdowns. Both vanished at the branch’s next commit, which didn’t touch CSS either.
+
+One binary per arm is one draw of that. Every round measures the same draw again, so the rounds agree with each other — and the t-test reports a confident mover.
+
+So before every kept round, the tool relinks both arms in a fresh function order: the same code, with every function’s place drawn from a seed, and handed to the linker as an order file (`-order_file` for Apple’s ld on macOS, `--symbol-ordering-file` for lld on Linux). A layout effect then changes from round to round like any other noise, and the analysis sees it as spread; a real change holds under every order. The resolution the section quotes covers layout too — which makes it wider for the tests layout moves most, and honest for all of them.
+
+A relink reuses the link commands from the tree’s own build rules, the codesign-with-entitlements steps on macOS included, and goes through a ThinLTO cache: An order changes where code goes, not what codegen makes of it — so after an arm’s first relink, every module is a cache hit. The first relink of an arm fills the cache and takes a few minutes; after that, both arms relink in about 20 seconds per round. When the run ends, both trees are relinked in the order their builds produced.
+
+Every round’s seeds come from one run seed, printed at the start and recorded as `layout_seed` in the run’s `provenance.json`, with the per-round seeds in `function-orders.json`; `--layout-seed N` draws the same orders again. `--fixed-layout` measures each arm in the one order its build produced — faster, and blind to layout.
+
+On Linux, this needs the tree to link with lld, which Ladybird’s CMake picks whenever it finds `ld.lld`; with any other linker, the tool stops and says so.
+
 ## Both arms have to be compiled the same way
 
 A comparison between two differently-compiled browsers measures the *compiler*, not the branch. That’s not hypothetical: Until Ladybird’s `CMakeLists.txt` was reordered to define `ENABLE_LTO_FOR_RELEASE` before `compile_options` reads it, a Release or Distribution tree skipped LTO on a first configure and turned it on at the second — so a freshly-created worktree and a reused one differed by a whole optimization mode. An A/B run between two such trees reported 209 tests moving by 3% to 100% — every one of those moves fictional.
@@ -114,6 +129,8 @@ Every check exists because it changes measured times: mains power (blocking), on
 | `--benchmarks A,B` | Suites to run, default all ten. |
 | `--focus X [Y ...]` | Suites or `Benchmark/test` keys judged as their own family. |
 | `--calibrate` | A-vs-A run against the current commit; records the noise floor. |
+| `--fixed-layout` | Measure each arm in the one function order its build produced, rather than a fresh one per round. |
+| `--layout-seed N` | The seed every round’s function orders are drawn from; default a new one every run. |
 | `--dry-run` | Print the plan and the estimate, run nothing. |
 | `--force` | Run even though preflight objects. |
 | `--ladybird DIR` | The checkout to measure, default the current directory. |
@@ -132,8 +149,8 @@ A=~/.cache/ladybird-bench/e6b803be8dc..ad0ed72c4d0-20260909-002312
 
 ## Tests
 
-The planning logic, the analysis, and bench_pr.py's own argument checks are covered by unit tests that need no browser or build:
+The planning logic, the analysis, the function-order logic, and bench_pr.py's own argument checks are covered by unit tests that need no browser or build:
 
 ```bash
-python -m unittest test_bench_plan test_bench_compare test_bench_pr
+python -m unittest test_bench_plan test_bench_compare test_bench_pr test_layout
 ```

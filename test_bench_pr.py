@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Tests for the parts of bench_pr.py that need no build and no browser: its argument checks, and the cache seed a
-fresh worktree gets."""
+"""Tests for the parts of bench_pr.py that need no build and no browser: its argument checks, the cache seed a fresh
+worktree gets, and which executables a relink covers."""
 import os
 import subprocess
 import sys
@@ -50,6 +50,29 @@ class RunLock(unittest.TestCase):
             third, _ = bench_pr.hold_run_lock(root)
             self.assertIsNotNone(third)
             third.close()
+
+
+class RunnableExecutables(unittest.TestCase):
+    @staticmethod
+    def make(build, paths):
+        for rel in paths:
+            os.makedirs(os.path.join(build, os.path.dirname(rel)), exist_ok=True)
+            open(os.path.join(build, rel), "w").close()
+
+    def test_on_macos_every_binary_in_the_bundle_is_relinked_and_the_browser_last(self):
+        # The browser's link command re-signs the bundle, so every helper has to be in place before it runs.
+        with tempfile.TemporaryDirectory() as build:
+            macos = "bin/Ladybird.app/Contents/MacOS"
+            self.make(build, [f"{macos}/WebContent", f"{macos}/Ladybird", f"{macos}/Compositor"])
+            self.assertEqual(bench_pr.runnable_executables(build, "Darwin"),
+                             [f"{macos}/Compositor", f"{macos}/WebContent", f"{macos}/Ladybird"])
+
+    def test_elsewhere_the_libexec_helpers_are_relinked_and_then_the_browser(self):
+        with tempfile.TemporaryDirectory() as build:
+            self.make(build, ["libexec/WebContent", "libexec/RequestServer", "bin/Ladybird"])
+            os.makedirs(os.path.join(build, "libexec/not-a-binary"))
+            self.assertEqual(bench_pr.runnable_executables(build, "Linux"),
+                             ["libexec/RequestServer", "libexec/WebContent", "bin/Ladybird"])
 
 
 if __name__ == "__main__":

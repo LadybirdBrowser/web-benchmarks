@@ -76,7 +76,7 @@ script. For example:
 
 ## Measuring a Branch Before a PR
 
-`bench_pr.py` compares a Ladybird branch against its merge-base: It compiles both, runs every suite in an interleaved loop, tests the per-test differences for significance, and writes the performance section for the PR body.
+`bench_pr.py` compares a Ladybird branch against its merge-base: It compiles both, runs every suite in an interleaved loop (relinking both arms in a fresh function order every round), tests the per-test differences for significance, and writes the performance section for the PR body.
 
 ```bash
 cd /path/to/your-ladybird-branch

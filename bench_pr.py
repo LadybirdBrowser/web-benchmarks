@@ -8,6 +8,7 @@ are interleaved suite by suite — so the comparison survives, whatever else the
     /path/to/web-benchmarks/bench_pr.py --dry-run          # the plan and the ETA, run nothing
     /path/to/web-benchmarks/bench_pr.py --calibrate        # A-vs-A: this machine's resolution
     /path/to/web-benchmarks/bench_pr.py --focus WebKitSVG  # the tests the change targets
+    /path/to/web-benchmarks/bench_pr.py --fixed-layout     # one function order per arm, as the build made it
 
 MEASURING-A-BRANCH.md walks through a first run and how to read what comes out.
 """
@@ -18,6 +19,7 @@ import importlib.util
 import json
 import os
 import platform
+import random
 import re
 import subprocess
 import sys
@@ -48,6 +50,7 @@ if importlib.util.find_spec("scipy") is None:
 sys.path.insert(0, HERE)
 import bench_compare
 import bench_plan
+import layout
 
 PLUS_MINUS = bench_compare.PLUS_MINUS
 
@@ -108,6 +111,96 @@ def executable_in(tree):
     if platform.system() == "Darwin":
         return os.path.join(tree, "Build/distribution/bin/Ladybird.app/Contents/MacOS/Ladybird")
     return os.path.join(tree, "Build/distribution/bin/Ladybird")
+
+
+def build_dir_of(tree):
+    return os.path.join(tree, "Build/distribution")
+
+
+def ninja_program(build_dir):
+    """The ninja CMake configured the tree with — the one Meta/ladybird.py builds with, which needn't be on PATH."""
+    cache = os.path.join(build_dir, "CMakeCache.txt")
+    text = open(cache).read() if os.path.exists(cache) else ""
+    match = re.search(r"^CMAKE_MAKE_PROGRAM:[A-Z]+=(.+)$", text, re.M)
+    return match.group(1).strip() if match else "ninja"
+
+
+def runnable_executables(build_dir, system=None):
+    """The executables a benchmark run can start, relative to the build directory: every binary in the app bundle on
+    macOS, and the browser and its libexec helpers elsewhere. The browser itself comes last — on macOS its link command
+    re-signs the whole bundle, which has to happen after every helper inside it has been relinked."""
+    darwin = (system or platform.system()) == "Darwin"
+    folder = "bin/Ladybird.app/Contents/MacOS" if darwin else "libexec"
+    browser = "bin/Ladybird.app/Contents/MacOS/Ladybird" if darwin else "bin/Ladybird"
+    path = os.path.join(build_dir, folder)
+    names = sorted(os.listdir(path)) if os.path.isdir(path) else []
+    helpers = [f"{folder}/{name}" for name in names if os.path.isfile(os.path.join(path, name))]
+    return [rel for rel in helpers if rel != browser] + [browser]
+
+
+class ArmLayout:
+    """One arm's executables and the commands that linked them — so the arm can be relinked with any function order,
+    in seconds once the ThinLTO cache holds its codegen. The commands come from the tree's own build rules, the
+    codesign-with-entitlements steps chained after them included."""
+
+    STAMP = ".bench-function-order"
+
+    def __init__(self, arm, tree):
+        self.arm = arm
+        self.tree = tree
+        self.build_dir = build_dir_of(tree)
+        self.log = os.path.join(bench_plan.cache_root(), f"relink-{arm}.log")
+        self.order_file = os.path.join(bench_plan.cache_root(), f"function-order-{arm}.txt")
+        self.cache_dir = os.path.join(bench_plan.cache_root(), "thinlto-cache")
+        builder = ninja_program(self.build_dir)
+        self.links = {}
+        for output in runnable_executables(self.build_dir):
+            chain = subprocess.run([builder, "-C", self.build_dir, "-t", "commands", output], text=True,
+                                   stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).stdout.strip().splitlines()
+            # The last command in the chain is the one that makes the output. Anything else there (a script, a copy)
+            # isn't a link, and keeps the order it has.
+            if chain and f" -o {output}" in chain[-1]:
+                self.links[output] = chain[-1]
+        self.symbols = set()
+        for output in self.links:
+            nm = subprocess.run(["nm", "-P", "--defined-only", os.path.join(self.build_dir, output)], text=True,
+                                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL).stdout
+            self.symbols |= layout.text_symbols(nm)
+
+    def unsupported(self):
+        if not self.links:
+            return f"found no link commands for the executables in {self.build_dir}"
+        return layout.unsupported_linker(platform.system(), next(reversed(self.links.values())))
+
+    def has_drawn_order(self):
+        return os.path.exists(os.path.join(self.tree, self.STAMP))
+
+    def relink(self, seed):
+        """Relink every executable with the function order drawn from seed — or, with None, in the order the build
+        produced. Returns the wall seconds it took."""
+        order_file = None
+        if seed is not None:
+            with open(self.order_file, "w") as f:
+                f.write("\n".join(layout.order_for_seed(self.symbols, seed)) + "\n")
+            order_file = self.order_file
+        flags = layout.linker_flags(platform.system(), self.cache_dir, order_file)
+        start = time.monotonic()
+        with open(self.log, "a") as lf:
+            which = f"order {seed}" if seed is not None else "default order"
+            lf.write(f"=== {datetime.datetime.now():%Y-%m-%d %H:%M:%S} {self.arm}: {which}\n")
+            lf.flush()
+            for output, command in self.links.items():
+                rc = subprocess.run(["sh", "-c", layout.with_flags(command, output, flags)], cwd=self.build_dir,
+                                    stdout=lf, stderr=subprocess.STDOUT).returncode
+                if rc != 0:
+                    sys.exit(f"Relinking {output} for the {self.arm} arm failed; see {self.log}")
+        stamp = os.path.join(self.tree, self.STAMP)
+        if seed is None:
+            if os.path.exists(stamp):
+                os.remove(stamp)
+        else:
+            open(stamp, "w").write(str(seed))
+        return time.monotonic() - start
 
 
 def seed_caches(source_repo, tree):
@@ -299,6 +392,10 @@ def main():
     ap.add_argument("--focus", nargs="*", default=[],
                     help="suites or benchmark/test keys the change targets; judged as their own family")
     ap.add_argument("--calibrate", action="store_true", help="A-vs-A run to measure this machine's resolution")
+    ap.add_argument("--fixed-layout", action="store_true",
+                    help="measure each arm in the one function order its build produced, not a fresh one per round")
+    ap.add_argument("--layout-seed", type=int, metavar="N",
+                    help="the seed each round's function orders are drawn from (default: a new one every run)")
     ap.add_argument("--ladybird", default=os.getcwd(), metavar="DIR",
                     help="the Ladybird checkout to measure (default: the current directory)")
     ap.add_argument("--worktree-root", default=os.path.join(bench_plan.cache_root(), "worktrees"),
@@ -319,15 +416,20 @@ def main():
     suites = args.benchmarks.split(",")
 
     base_sha, head_sha = resolve_revisions(worktree, args.calibrate)
-    print(f"baseline (merge-base): {base_sha[:11]}" if not args.calibrate else f"A-vs-A of {head_sha[:11]}")
-    if not args.calibrate:
+    if args.calibrate:
+        print(f"A-vs-A of {head_sha[:11]}" +
+              ("" if args.fixed_layout else ": two builds, a fresh function order per round"))
+    else:
+        print(f"baseline (merge-base): {base_sha[:11]}")
         print(f"branch head:           {head_sha[:11]}")
 
     plan = bench_plan.round_plan(args.rounds)
-    eta = bench_plan.estimate_seconds(suites, args.rounds, args.iterations)
+    eta = bench_plan.estimate_seconds(suites, args.rounds, args.iterations, relink=not args.fixed_layout)
     print(f"suites: {', '.join(suites)}" + (f"   focus: {', '.join(args.focus)}" if args.focus else ""))
     print(f"plan: {len(plan)} rounds ({args.rounds} kept + 1 warmup), 2 arms interleaved per suite, "
-          f"{args.iterations} iteration(s) per launch, ETA about {eta / 60:.0f} min")
+          f"{args.iterations} iteration(s) per launch" +
+          ("" if args.fixed_layout else ", a fresh function order per kept round") +
+          f", ETA about {eta / 60:.0f} min")
     if args.dry_run:
         return
 
@@ -358,10 +460,14 @@ def main():
     print("Preparing builds ...")
     root = os.path.abspath(args.worktree_root)
     base_tree = ensure_worktree("base", base_sha, source_repo, root)
-    head_tree = base_tree if args.calibrate else ensure_worktree("head", head_sha, source_repo, root)
+    # Every round relinks the two arms in different orders — so with drawn orders, even an A-vs-A run needs the two
+    # arms in two trees.
+    head_tree = (base_tree if args.calibrate and args.fixed_layout
+                 else ensure_worktree("head", head_sha, source_repo, root))
     arms = {"base": executable_in(base_tree), "head": executable_in(head_tree)}
     flags = {"base": compile_flags_in(base_tree), "head": compile_flags_in(head_tree)}
-    build = f"Distribution preset, {compiler_in(base_tree)}, {bench_plan.lto_state(flags['base'])}"
+    build = (f"Distribution preset, {compiler_in(base_tree)}, {bench_plan.lto_state(flags['base'])}" +
+             ("" if args.fixed_layout else ", a fresh function order per round"))
     for p in bench_plan.build_parity_problems(flags):
         print("  BLOCKING: " + p.message)
         sys.exit("The two arms are not comparable; delete the offending worktree's Build "
@@ -371,15 +477,47 @@ def main():
             if "different build" in p.message:
                 print("  warning:  " + p.message)
 
+    arm_layouts, run_seed = {}, None
+    if args.fixed_layout:
+        # A run that stopped part way leaves its last drawn order in the tree, so put the build's own order back. An
+        # A-vs-A run here has one tree for both arms, and relinks it once.
+        for tree, arm in {head_tree: "head", base_tree: "base"}.items():
+            if os.path.exists(os.path.join(tree, ArmLayout.STAMP)):
+                ArmLayout(arm, tree).relink(None)
+    else:
+        run_seed = args.layout_seed if args.layout_seed is not None else random.SystemRandom().randrange(1, 2 ** 31)
+        print(f"Preparing function orders (seed {run_seed}) ...")
+        for arm, tree in (("base", base_tree), ("head", head_tree)):
+            arm_layouts[arm] = ArmLayout(arm, tree)
+            problem = arm_layouts[arm].unsupported()
+            if problem:
+                sys.exit(f"Can't draw function orders for the {arm} arm: {problem}.")
+            # The first relink fills the ThinLTO cache, and puts the build's own order back after an interrupted run.
+            elapsed = arm_layouts[arm].relink(None)
+            print(f"  {arm}: {len(arm_layouts[arm].links)} executables, {len(arm_layouts[arm].symbols)} functions, "
+                  f"relinked in {elapsed:.0f}s (watch: tail -f {arm_layouts[arm].log})")
+
     stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     archive = bench_plan.archive_dir(base_sha, head_sha, stamp)
     os.makedirs(archive, exist_ok=True)
 
     collected = {"base": [], "head": []}
+    round_seeds = {}
     for rnd in plan:
         label = "warmup" if rnd.is_warmup else f"round {rnd.index}/{args.rounds}"
+        relinked = ""
+        if arm_layouts and not rnd.is_warmup:
+            round_seeds[rnd.index] = {arm: layout.round_seed(run_seed, arm, rnd.index) for arm in arm_layouts}
+            elapsed = sum(arm_layouts[arm].relink(seed) for arm, seed in round_seeds[rnd.index].items())
+            # The relinks leave a gigabyte or so of freshly written executables for the kernel to write back — which
+            # Linux would start about 30s later, in the middle of the round (and in a VM, as host disk I/O). So flush it
+            # before measuring.
+            start = time.monotonic()
+            os.sync()
+            relinked = (f", fresh function orders relinked in {elapsed:.0f}s and flushed to disk in "
+                        f"{time.monotonic() - start:.0f}s")
         print(f"  {label}: {rnd.order[0]} then {rnd.order[1]}, alternating per suite "
-              f"(thermal state {thermal_state()})")
+              f"(thermal state {thermal_state()}{relinked})")
         orders = {}
         for suite, arm in bench_plan.schedule(rnd, suites):
             orders.setdefault(suite, []).append(arm)
@@ -396,6 +534,12 @@ def main():
             if not rnd.is_warmup:
                 collected[arm].append(merged[arm])
 
+    for arm_layout in arm_layouts.values():
+        arm_layout.relink(None)
+    if arm_layouts:
+        with open(os.path.join(archive, "function-orders.json"), "w") as f:
+            json.dump({"seed": run_seed, "rounds": round_seeds}, f, indent=2)
+
     analysis = bench_compare.analyze(collected["base"], collected["head"], focus=args.focus)
     provenance = {
         "baseline": base_sha[:11], "branch": head_sha[:11], "benchmarks": benchmarks_sha,
@@ -403,6 +547,8 @@ def main():
         "machine": machine,
         "suites": ", ".join(suites) + (f"; {args.iterations} iterations per launch" if args.iterations > 1 else ""),
     }
+    if run_seed is not None:
+        provenance["layout_seed"] = run_seed
     if floor and not args.calibrate:
         provenance["calibration"] = (f"A-vs-A on {floor['when'][:8]}: {floor['false_movers']} false mover(s), "
                                      f"resolution {PLUS_MINUS}{floor['p90_pct']:.1f}% p90")
