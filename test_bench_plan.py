@@ -82,6 +82,11 @@ class Estimate(unittest.TestCase):
         expected = 16 * (bench_plan.SUITE_SECONDS["WebKitCSS"] + bench_plan.SUITE_SECONDS["WebKitDOM"])
         self.assertAlmostEqual(bench_plan.estimate_seconds(suites, kept_rounds=7), expected)
 
+    def test_fresh_function_orders_add_a_relink_to_every_kept_round_but_not_the_warmup(self):
+        fixed = bench_plan.estimate_seconds(["WebKitCSS"], kept_rounds=8)
+        drawn = bench_plan.estimate_seconds(["WebKitCSS"], kept_rounds=8, relink=True)
+        self.assertAlmostEqual(drawn - fixed, 8 * bench_plan.RELINK_SECONDS)
+
     def test_every_default_suite_has_a_measured_cost(self):
         for suite in bench_plan.default_suites():
             self.assertIn(suite, bench_plan.SUITE_SECONDS)

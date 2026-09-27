@@ -26,6 +26,10 @@ SUITE_SECONDS = {
 # many iterations the suite then runs.
 LAUNCH_SECONDS = 2.5
 
+# Wall seconds to relink both arms in fresh function orders before a kept round, once the ThinLTO cache is warm;
+# measured on the same Mac as SUITE_SECONDS.
+RELINK_SECONDS = 22
+
 # Kept rounds per arm. Even, so that per suite each arm goes first as often as the other: an odd count leaves one arm
 # ahead by a round, and 1/N of whatever going first costs then leaks into every test's mean.
 DEFAULT_KEPT_ROUNDS = 8
@@ -172,11 +176,12 @@ def records_floor(suites):
     return sorted(suites) == sorted(SUITES)
 
 
-def estimate_seconds(suites, kept_rounds, iterations=1):
+def estimate_seconds(suites, kept_rounds, iterations=1, relink=False):
     """Every selected suite runs once per arm in every round, warmup included; the launch is paid per invocation and the
-    tests themselves per-iteration — so an extra iteration costs less wall time than an extra round."""
+    tests themselves per-iteration — so an extra iteration costs less wall time than an extra round. With relink,
+    every kept round starts by relinking both arms in fresh function orders."""
     per_suite = sum(LAUNCH_SECONDS + iterations * (SUITE_SECONDS[s] - LAUNCH_SECONDS) for s in suites)
-    return (kept_rounds + 1) * 2 * per_suite
+    return (kept_rounds + 1) * 2 * per_suite + (kept_rounds * RELINK_SECONDS if relink else 0)
 
 
 def archive_dir(base_sha, head_sha, timestamp):
