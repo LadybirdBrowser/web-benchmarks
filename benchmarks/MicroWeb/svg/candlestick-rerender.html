@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<!-- React-Stockcharts pan: rewrite 150 candle bodies (rect x/y/height/class) and 150 wick paths (d), then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => {
+    const svg = makeSVG(0);
+    const bodies = [], wicks = [];
+    for (let i = 0; i < 150; i++) {
+        const wick = document.createElementNS(SVG_NS, "path");
+        wick.setAttribute("stroke", "#000");
+        const body = document.createElementNS(SVG_NS, "rect");
+        body.setAttribute("width", "2");
+        svg.appendChild(wick); svg.appendChild(body);
+        bodies.push(body); wicks.push(wick);
+    }
+    return { bodies, wicks };
+},
+    mutate: ({ bodies, wicks }, k) => {
+    for (let i = 0; i < 150; i++) {
+        const x = i * 4, open = 100 + ((i + k) * 37) % 80, close = 100 + ((i + k) * 53) % 80;
+        bodies[i].setAttribute("x", String(x - 1));
+        bodies[i].setAttribute("y", String(Math.min(open, close)));
+        bodies[i].setAttribute("height", String(Math.abs(open - close) + 1));
+        bodies[i].setAttribute("class", open > close ? "down" : "up");
+        wicks[i].setAttribute("d", "M" + x + "," + (Math.min(open, close) - 10) + "L" + x + "," + (Math.max(open, close) + 10));
+    }
+},
+});
+</script>
+</body>
+</html>

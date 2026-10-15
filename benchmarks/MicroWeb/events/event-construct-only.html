@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<!-- new Event / new CustomEvent / new KeyboardEvent construction without dispatch -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const e = (i % 3 === 0) ? new Event("change", { bubbles: true }) : (i % 3 === 1) ? new CustomEvent("toggle-item", { detail: i }) : new KeyboardEvent("keyup", { key: "Enter" });
+        acc += e.type.length;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

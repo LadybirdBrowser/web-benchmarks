@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<!-- template.innerHTML = ~1.5KB component markup (with <style>) then content.cloneNode(true) (Perf-Dashboard ComponentBase htmlTemplate/cssTemplate) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 500,
+    setup: () => {
+    let markup = "<style>:host{display:block} .pane{display:flex} .header{font-weight:bold}</style><div class='pane'>";
+    for (let i = 0; i < 10; i++)
+        markup += `<div class="row" id="row-${i}"><span class="header">Label ${i}</span><input type="text" value="v${i}"><button class="action" title="Do ${i}">Go</button><a href="#item-${i}">link</a></div>`;
+    return markup + "</div>";
+},
+    run: (markup, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const t = document.createElement("template");
+        t.innerHTML = markup;
+        acc += t.content.cloneNode(true).childNodes.length;
+    }
+    if (acc !== 2 * iters) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- element.remove() of attached todo items (no layout flush), list rebuilt untimed -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 10000,
+    setup: () => {
+    const list = buildList(0);
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < 10000; i++) fragment.appendChild(makeTodoItem(i, false));
+    list.appendChild(fragment);
+    return list;
+},
+    run: (list, iters) => {
+    for (let i = 0; i < iters; i++)
+        list.lastElementChild.remove();
+    if (list.childElementCount !== 0) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

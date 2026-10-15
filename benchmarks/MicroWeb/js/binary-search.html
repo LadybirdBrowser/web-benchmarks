@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<!-- bisect (binary search) into a sorted 2000-element Float64 time array (Perf-Dashboard TimeSeries, Stockcharts xAccessor) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 100000,
+    setup: () => Float64Array.from({ length: 2000 }, (_, i) => 1e12 + i * 86400000),
+    run: (times, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const x = 1e12 + ((i * 7919) % 2000) * 86400000 + 1;
+        let lo = 0, hi = times.length;
+        while (lo < hi) { const mid = (lo + hi) >>> 1; if (times[mid] < x) lo = mid + 1; else hi = mid; }
+        acc += lo;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

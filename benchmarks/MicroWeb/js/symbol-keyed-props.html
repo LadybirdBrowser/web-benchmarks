@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<!-- get/set of Symbol-keyed properties on objects (Lit/Vue internal markers, React $$typeof checks) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 200000,
+    setup: () => {
+    const marker = Symbol("marker"), raw = Symbol.for("__v_raw");
+    const objects = Array.from({ length: 64 }, (_, i) => ({ id: i, [marker]: i & 1, [raw]: null }));
+    return { objects, marker, raw };
+},
+    run: ({ objects, marker, raw }, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const o = objects[i & 63];
+        acc += o[marker];
+        o[raw] = i & 1 ? o : null;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

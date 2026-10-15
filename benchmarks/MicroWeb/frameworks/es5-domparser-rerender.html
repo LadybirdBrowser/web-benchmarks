@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<!-- re-render a 100-item list the ES5 TodoMVC way: String.replace template, DOMParser, replaceChildren(...childNodes), then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => {
+    ensureListStyles();
+    sandbox().innerHTML = "<ul class='todo-list'></ul>";
+    return sandbox().firstChild;
+},
+    mutate: (list, k) => {
+    const template = '<li data-id="{{id}}" class="{{completed}}"><div class="view"><input class="toggle" type="checkbox" {{checked}}><label>{{title}}</label><button class="destroy"></button></div></li>';
+    let view = "";
+    for (let i = 0; i < 100; i++) {
+        const done = (i + k) % 3 === 0;
+        view += template.replace("{{id}}", i).replace("{{completed}}", done ? "completed" : "").replace("{{checked}}", done ? "checked" : "").replace("{{title}}", todoTitle(i));
+    }
+    const doc = new DOMParser().parseFromString(view, "text/html");
+    list.replaceChildren(...doc.body.childNodes);
+    if (list.childElementCount !== 100) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

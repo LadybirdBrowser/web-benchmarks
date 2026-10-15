@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<!-- ES5 TodoMVC store.update: JSON.parse the whole 100-todo store string, find + modify one todo, JSON.stringify it back -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 200,
+    setup: () => JSON.stringify({ todos: Array.from({ length: 100 }, (_, i) => ({ id: i, title: todoTitle(i), completed: false })) }),
+    run: (initial, iters) => {
+    let stored = initial;
+    for (let i = 0; i < iters; i++) {
+        const data = JSON.parse(stored);
+        const todo = data.todos.find((t) => t.id === (i * 7) % 100);
+        todo.completed = !todo.completed;
+        stored = JSON.stringify(data);
+    }
+    if (stored.length < initial.length) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

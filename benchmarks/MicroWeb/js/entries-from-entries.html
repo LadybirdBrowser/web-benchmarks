@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- Object.fromEntries(Object.entries(obj).map(...)) remapping an 8-property object (Plot channels, Redux selectors) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => ({ a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7, h: 8 }),
+    run: (obj, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, v * (i & 3)])).h;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

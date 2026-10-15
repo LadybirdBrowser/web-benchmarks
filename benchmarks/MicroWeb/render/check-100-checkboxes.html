@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<!-- set .checked on 100 todo checkboxes, then force layout once -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 20,
+    setup: () => Array.from(buildList(100).querySelectorAll('.toggle')),
+    mutate: (toggles, k) => {
+    for (const toggle of toggles)
+        toggle.checked = !(k & 1);
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<!-- sort a fresh copy of 100 objects with a comparator on a number then a string key (d3/Plot sort, Perf-Dashboard series) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 500,
+    setup: () => {
+    const rows = [];
+    for (let i = 0; i < 100; i++) rows.push({ value: (i * 7919) % 50, name: "airport" + ((i * 104729) % 1000) });
+    return rows;
+},
+    run: (rows, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const sorted = rows.slice().sort((a, b) => a.value - b.value || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+        acc += sorted[(i * 7) % 100].value;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

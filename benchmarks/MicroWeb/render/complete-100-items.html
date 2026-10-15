@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<!-- set className 'completed' on all 100 todo items, then force layout once (CompletingAllItems, batched frameworks) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 20,
+    setup: () => { ensureListStyles(); return buildList(100); },
+    mutate: (list, k) => {
+    const value = k & 1 ? "" : "completed";
+    for (const li of list.children)
+        li.className = value;
+},
+});
+</script>
+</body>
+</html>

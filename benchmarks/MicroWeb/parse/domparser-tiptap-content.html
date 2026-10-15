@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- DOMParser.parseFromString of a ~6KB book chunk (section/h2/p/span lang/strong) and count elements (TipTap setContent) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 100,
+    setup: () => {
+    let html = "";
+    for (let i = 0; i < 12; i++)
+        html += `<section><h2>Chapter ${i}</h2><p>${"It was the best of times, it was the worst of times, ".repeat(6)}<span lang="la">lorem ipsum ${i}</span> <strong>bold ${i}</strong></p></section>`;
+    return html;
+},
+    run: (html, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += new DOMParser().parseFromString(html, "text/html").body.getElementsByTagName("*").length;
+    if (acc !== 60 * iters) throw new Error("bad result " + acc);
+},
+});
+</script>
+</body>
+</html>

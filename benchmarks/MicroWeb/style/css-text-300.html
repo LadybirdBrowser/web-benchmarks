@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- style.cssText with 4 declarations (width, height, background-color, transform) on 300 cells, then force layout once -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => {
+    sandbox().textContent = "";
+    const cells = [];
+    for (let i = 0; i < 300; i++) { const d = document.createElement("div"); d.style.display = "inline-block"; sandbox().appendChild(d); cells.push(d); }
+    return cells;
+},
+    mutate: (cells, k) => {
+    for (let i = 0; i < 300; i++) {
+        const v = (i + k) % 40;
+        cells[i].style.cssText = `display: inline-block; width: ${v + 20}px; height: 12px; background-color: rgb(${v * 5}, 100, 150); transform: translate(${v}px, 0px)`;
+    }
+},
+});
+</script>
+</body>
+</html>

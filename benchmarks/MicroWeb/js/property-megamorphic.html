@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- read 'id' from objects of 32 different shapes at one site (generic framework code over many prop shapes) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 200000,
+    setup: () => {
+    const objects = [];
+    for (let i = 0; i < 640; i++) { const o = {}; o["k" + (i % 32)] = i; o.id = i; objects.push(o); }
+    return objects;
+},
+    run: (objects, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) acc += objects[i % 640].id;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

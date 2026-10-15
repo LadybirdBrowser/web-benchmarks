@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- jQuery TodoMVC render(): rebuild a 100-item list string with a Handlebars-like loop, set innerHTML, rebuild the footer, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => {
+    ensureListStyles();
+    sandbox().innerHTML = "<ul class='todo-list'></ul><footer><span class='todo-count'></span></footer>";
+    return { list: sandbox().firstChild, footer: sandbox().lastChild };
+},
+    mutate: ({ list, footer }, k) => {
+    const todos = [];
+    for (let i = 0; i < 100; i++) todos.push({ id: i, title: todoTitle(i), completed: (i + k) % 4 === 0 });
+    list.innerHTML = todos.map((t) => `<li${t.completed ? ' class="completed"' : ""} data-id="${t.id}"><div class="view"><input class="toggle" type="checkbox"${t.completed ? " checked" : ""}><label>${t.title}</label><button class="destroy"></button></div><input class="edit" value="${t.title}"></li>`).join("");
+    const active = todos.filter((t) => !t.completed).length;
+    footer.innerHTML = `<span class="todo-count"><strong>${active}</strong> ${active === 1 ? "item" : "items"} left</span>`;
+},
+});
+</script>
+</body>
+</html>

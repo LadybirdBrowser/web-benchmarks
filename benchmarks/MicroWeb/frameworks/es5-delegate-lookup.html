@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- ES5 TodoMVC $delegate: querySelectorAll(selector, list) + Array.prototype.indexOf.call(matches, target) per event -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => { const list = buildList(100); return { list, toggles: Array.from(list.querySelectorAll('.toggle')) }; },
+    run: ({ list, toggles }, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += Array.prototype.indexOf.call(list.querySelectorAll(".toggle"), toggles[i % 100]);
+    if (acc <= 0) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

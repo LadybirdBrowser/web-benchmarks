@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<!-- new KeyboardEvent('keypress', {key: 'Enter', keyCode: 13, which: 13}) on .new-todo, listeners on the input and the app root read key/keyCode/target.value (the Speedometer driver's enter()) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => {
+    sandbox().innerHTML = TODO_APP_HTML;
+    const input = sandbox().querySelector(".new-todo");
+    input.value = "Walk the dog";
+    const counts = { seen: 0 };
+    input.addEventListener("keypress", (e) => { if (e.keyCode === 13) counts.seen++; });
+    sandbox().firstChild.addEventListener("keypress", (e) => { if (e.key === "Enter" && e.target.value.length) counts.seen++; });
+    return { input, counts };
+},
+    run: ({ input, counts }, iters) => {
+    for (let i = 0; i < iters; i++)
+        input.dispatchEvent(new KeyboardEvent("keypress", { bubbles: true, cancelable: true, keyCode: 13, which: 13, key: "Enter" }));
+    if (counts.seen !== 2 * iters) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

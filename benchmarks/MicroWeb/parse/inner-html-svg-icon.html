@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- innerHTML of a button containing an inline SVG icon with a long path 'd' (Spectrum/NewsSite icons) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => document.createElement("div"),
+    run: (div, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        div.innerHTML = '<button class="spectrum-ActionButton"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" class="spectrum-Icon" focusable="false" aria-hidden="true"><path d="M9 1a8 8 0 1 0 8 8 8 8 0 0 0-8-8Zm-4.49 9.695A1.696 1.696 0 1 1 6.206 9a1.696 1.696 0 0 1-1.696 1.695Zm4.49 0A1.696 1.696 0 1 1 10.696 9V9A1.696 1.696 0 0 1 9 10.695Z"></path></svg><span>Item ' + (i & 7) + '</span></button>';
+        acc += div.firstChild.childElementCount;
+    }
+    if (acc !== 2 * iters) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

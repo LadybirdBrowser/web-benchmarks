@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<!-- Vue 3 reactivity: Proxy get trap with track() into WeakMap/Map/Set deps and set trap with Reflect.set + trigger(), 2 reads + 1 write per op -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => {
+    const targetMap = new WeakMap();
+    const effect = {};
+    const track = (target, key) => {
+        let depsMap = targetMap.get(target);
+        if (!depsMap) targetMap.set(target, (depsMap = new Map()));
+        let dep = depsMap.get(key);
+        if (!dep) depsMap.set(key, (dep = new Set()));
+        if (!dep.has(effect)) dep.add(effect);
+    };
+    const state = { triggered: 0 };
+    const trigger = (target, key) => { const deps = targetMap.get(target); if (deps && deps.get(key)) state.triggered++; };
+    const handler = {
+        get(target, key, receiver) { const result = Reflect.get(target, key, receiver); track(target, key); return result; },
+        set(target, key, value, receiver) { const old = target[key]; const result = Reflect.set(target, key, value, receiver); if (old !== value) trigger(target, key); return result; },
+    };
+    const items = [];
+    for (let i = 0; i < 100; i++) items.push(new Proxy({ id: i, title: "todo " + i, completed: false }, handler));
+    return { items, state };
+},
+    run: ({ items, state }, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const item = items[i % 100];
+        acc += item.id + item.title.length;
+        item.completed = !item.completed;
+    }
+    if (!acc || !state.triggered) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

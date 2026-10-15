@@ -83,6 +83,7 @@ Any unique substring of a test path works; several tests can be named at once, a
 | `timers/` | task and microtask scheduling | async settle plumbing |
 | `urlstate/` | URL parsing, history API, text encoding | NewsSite SPA navigation |
 | `storage/` | synchronous storage | app state persistence |
+| `complex/` | todo operations inside the ~6600-element Spectrum shell with big-dom.css (fixture in `resources/complex-dom/`, loaded once via `prepare`) | TodoMVC-*-Complex-DOM suites |
 
 A test that fails or measures an unimplemented feature reports an error instead of a
 number; the run continues, and the test simply has no row in the results (so ratios.py
@@ -112,10 +113,11 @@ Edit the spec in `resources/generate.py` and re-run it:
 ./resources/generate.py
 ```
 
-It rewrites the test pages and `index.html`. Keep one test to one operation family: a
-test that mixes two behaviors produces a multiplier nobody can act on. When a test's
-multiplier reaches ~1x, split it or replace it with a finer-grained probe of whatever
-is still slow.
+It rewrites the test pages and `index.html`. A test that needs an async fixture (a
+fetch, a stylesheet load) passes `prepare`: it runs once, untimed, and its result is
+handed to `setup`. Keep one test to one operation family: a test that mixes two
+behaviors produces a multiplier nobody can act on. When a test's multiplier reaches
+~1x, split it or replace it with a finer-grained probe of whatever is still slow.
 
 ## Provenance
 

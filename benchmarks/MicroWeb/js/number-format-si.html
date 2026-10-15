@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<!-- d3-format '.2s'/',': toExponential/toPrecision + SI prefix selection + thousands grouping by string slicing (Plot/Stockcharts axis labels) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    run: (ctx, iters) => {
+    const prefixes = ["y", "z", "a", "f", "p", "n", "µ", "m", "", "k", "M", "G", "T", "P", "E", "Z", "Y"];
+    const si = (x) => { const e = Math.max(-8, Math.min(8, Math.floor(Math.log10(Math.abs(x)) / 3))); return (x / Math.pow(10, e * 3)).toPrecision(2) + prefixes[8 + e]; };
+    const group = (x) => { const s = String(Math.round(x)); let out = ""; for (let i = 0; i < s.length; i++) { if (i && (s.length - i) % 3 === 0) out += ","; out += s[i]; } return out; };
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const v = (i * 7919.13) % 1e7 + 1;
+        acc += si(v).length + group(v).length;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

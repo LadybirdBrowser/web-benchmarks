@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<!-- Lit-style reactive update: property setter queues requestUpdate on a microtask; await updateComplete; render patches a text node and class inside the shadow root -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1,
+    setup: () => {
+    if (!window.MiniLit) {
+        window.MiniLit = class extends HTMLElement {
+            constructor() { super(); this._text = ""; this._done = false; this._pending = null; this.root = this.attachShadow({ mode: "open" }); this.root.innerHTML = "<li><label></label></li>"; this.li = this.root.firstChild; this.label = this.li.firstChild; }
+            set text(v) { this._text = v; this.requestUpdate(); }
+            set done(v) { this._done = v; this.requestUpdate(); }
+            requestUpdate() { if (!this._pending) this._pending = Promise.resolve().then(() => { this._pending = null; this.update(); }); }
+            get updateComplete() { return this._pending || Promise.resolve(); }
+            update() { this.label.textContent = this._text; this.li.className = this._done ? "completed" : ""; }
+        };
+        customElements.define("mini-lit", window.MiniLit);
+    }
+    sandbox().textContent = "";
+    const items = [];
+    for (let i = 0; i < 100; i++) { const el = document.createElement("mini-lit"); sandbox().appendChild(el); items.push(el); }
+    return items;
+},
+    run: async (items, iters) => {
+    for (let round = 0; round < 100; round++) {
+        for (let i = 0; i < 100; i++) { items[i].text = "todo " + i + " r" + round; items[i].done = (i + round) & 1; }
+        await Promise.all(items.map((item) => item.updateComplete));
+    }
+    if (!items[5].label.textContent.endsWith("r99")) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

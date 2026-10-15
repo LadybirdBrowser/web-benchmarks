@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<!-- keydown ArrowRight dispatched at an element inside a closed shadow root; a listener on the host checks key and updates a selection index (Perf-Dashboard SelectingPoints) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => {
+    sandbox().textContent = "";
+    const host = document.createElement("div");
+    sandbox().appendChild(host);
+    const root = host.attachShadow({ mode: "closed" });
+    root.innerHTML = "<div class='pane'><canvas width=10 height=10 tabindex=0></canvas></div>";
+    const canvas = root.querySelector("canvas");
+    const state = { index: 0 };
+    host.addEventListener("keydown", (e) => { if (e.key === "ArrowRight") state.index++; else if (e.key === "ArrowLeft") state.index--; });
+    return { canvas, state };
+},
+    run: ({ canvas, state }, iters) => {
+    for (let i = 0; i < iters; i++)
+        canvas.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, composed: true, cancelable: true }));
+    if (state.index !== iters) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

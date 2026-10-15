@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<!-- JSON.parse(JSON.stringify(state)) deep clone of a small nested state object (ES5 TodoMVC store, toJSON snapshots) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 10000,
+    setup: () => ({ filter: "all", editing: null, todos: [{ id: 1, title: "a", completed: false }, { id: 2, title: "b", completed: true }], meta: { version: 3, tags: ["x", "y"] } }),
+    run: (state, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) { state.meta.version = i & 15; acc += JSON.parse(JSON.stringify(state)).todos.length; }
+    if (acc !== 2 * iters) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

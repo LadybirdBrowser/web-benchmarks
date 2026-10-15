@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<!-- remove the last of the todo items in the Complex-DOM page, then force layout (DeletingAllItems) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 30,
+    prepare: () => loadComplexDOM(),
+    setup: (iteration, list) => fillTodoList(list, 100),
+    mutate: (list, k) => {
+    list.lastElementChild.remove();
+},
+});
+</script>
+</body>
+</html>

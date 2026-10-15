@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<!-- toggle 'completed' on one of 200 items under rules with :not(.completed), [data-priority] and child combinators (big-dom app.css shapes), then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 30,
+    setup: () => {
+    injectStyleOnce("not-rules", `
+        .show-priority li[data-priority="3"]:not(.completed) { border-left: 4px solid orange; }
+        .show-priority li[data-priority="4"]:not(.completed) > div > label { color: #b83f45; }
+        .show-priority li.completed:not([data-priority="4"]) > div > label { opacity: 0.6; }
+        .backlog-group li > div > :checked ~ label { color: green; }
+        .timeline-group input:not([value=""]) ~ div > :last-child { color: blue; }
+    `);
+    const list = fillTodoList(buildList(0), 200);
+    list.classList.add("show-priority");
+    return list;
+},
+    mutate: (list, k) => {
+    list.children[(k * 37) % 200].classList.toggle("completed");
+},
+});
+</script>
+</body>
+</html>

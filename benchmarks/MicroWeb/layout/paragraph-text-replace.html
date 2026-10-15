@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- replace a 600px paragraph's text with a different ~400-char sentence (line breaking from scratch), then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 50,
+    setup: () => {
+    sandbox().innerHTML = "<p style='width:600px;font:16px/1.5 serif'></p>";
+    const words = "the quick brown fox jumps over the lazy dog while the committee debates the merits of the new transit plan".split(" ");
+    const texts = [];
+    for (let t = 0; t < 16; t++) { const s = []; for (let w = 0; w < 70; w++) s.push(words[(t * 7 + w * 3) % words.length]); texts.push(s.join(" ")); }
+    return { p: sandbox().firstChild, texts };
+},
+    mutate: ({ p, texts }, k) => {
+    p.textContent = texts[k & 15];
+},
+});
+</script>
+</body>
+</html>

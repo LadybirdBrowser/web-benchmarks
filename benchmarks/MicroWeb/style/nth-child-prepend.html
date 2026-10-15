@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- prepend one item into a 200-item list styled with :nth-child(odd)/:first-child/:last-child, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 30,
+    setup: () => {
+    injectStyleOnce("nth", ".todo-list li:nth-child(odd) { background: #fafafa; } .todo-list li:first-child label { font-weight: bold; } .todo-list li:last-child { border-bottom: none; }");
+    return buildList(200);
+},
+    mutate: (list, k) => {
+    list.insertBefore(makeListItem(k, false), list.firstChild);
+},
+});
+</script>
+</body>
+</html>

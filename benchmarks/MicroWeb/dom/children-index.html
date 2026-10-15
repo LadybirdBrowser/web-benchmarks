@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- list.children[i] + childElementCount + childNodes.length on a 100-item list -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => buildList(100),
+    run: (list, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += list.children[i % 100].childElementCount + list.childNodes.length;
+    if (acc !== 101 * iters) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

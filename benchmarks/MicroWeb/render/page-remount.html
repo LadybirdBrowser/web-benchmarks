@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<!-- NewsSite route change: tear down and rebuild a ~600-element article page (header, nav, 6 sections of article cards), then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 3,
+    setup: () => {
+    injectStyleOnce("news-styles", `
+        .page { font: 16px/1.5 sans-serif; }
+        .page header, .page nav { display: flex; gap: 12px; padding: 8px; }
+        .page nav a { padding-inline: 8px; }
+        .page section { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-block: 16px; }
+        .page article { border: 1px solid #ddd; padding: 8px; }
+        .page article h3 { font-size: 18px; margin: 0 0 8px; }
+        .page article p { margin: 0; }
+    `);
+    sandbox().textContent = "";
+    return sandbox();
+},
+    mutate: (root, k) => {
+    root.textContent = "";
+    const page = document.createElement("div");
+    page.className = "page";
+    const header = document.createElement("header");
+    header.textContent = "The Daily Broadcast";
+    page.appendChild(header);
+    const nav = document.createElement("nav");
+    for (const name of ["Front Page", "US", "World", "Politics", "Business", "Opinion", "Health"]) {
+        const a = document.createElement("a");
+        a.href = "#/" + name.toLowerCase();
+        a.textContent = name;
+        nav.appendChild(a);
+    }
+    page.appendChild(nav);
+    for (let s = 0; s < 6; s++) {
+        const section = document.createElement("section");
+        for (let a = 0; a < 12; a++) {
+            const article = document.createElement("article");
+            const h3 = document.createElement("h3");
+            h3.textContent = "Headline " + (k * 100 + s * 12 + a) + " about the economy";
+            const p = document.createElement("p");
+            p.textContent = "The quick brown fox jumps over the lazy dog near the river bank while reporters gather. ".repeat(2);
+            const ul = document.createElement("ul");
+            for (let t = 0; t < 3; t++) { const li = document.createElement("li"); li.textContent = "tag" + t; ul.appendChild(li); }
+            article.append(h3, p, ul);
+            section.appendChild(article);
+        }
+        page.appendChild(section);
+    }
+    root.appendChild(page);
+},
+});
+</script>
+</body>
+</html>

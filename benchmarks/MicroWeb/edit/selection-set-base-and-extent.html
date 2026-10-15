@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<!-- getSelection().setBaseAndExtent across paragraphs of a focused contenteditable, reading anchorOffset/focusNode/rangeCount (ProseMirror selection sync) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => {
+    sandbox().innerHTML = "<div contenteditable='true' style='width:600px'></div>";
+    const editor = sandbox().firstChild;
+    for (let i = 0; i < 20; i++) { const p = document.createElement("p"); p.textContent = "Paragraph " + i + " has some editable text in it."; editor.appendChild(p); }
+    editor.focus();
+    return Array.from(editor.children, (p) => p.firstChild);
+},
+    run: (texts, iters) => {
+    const selection = getSelection();
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const a = texts[i % 20], b = texts[(i + 3) % 20];
+        selection.setBaseAndExtent(a, i % 10, b, (i % 7) + 1);
+        acc += selection.anchorOffset + selection.rangeCount + (selection.focusNode === b ? 1 : 0);
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

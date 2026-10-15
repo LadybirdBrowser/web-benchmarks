@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<!-- Number.prototype.toLocaleString and Date.prototype.toLocaleDateString without cached formatters (dashboards, tooltips) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 500,
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += (i * 1234.5).toLocaleString("en-US") .length + new Date(Date.UTC(2020, i % 12, 1 + (i % 28))).toLocaleDateString("en-US").length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

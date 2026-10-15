@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- set className 'completed' on all 100 todo items in the Complex-DOM page, then force layout once -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 4,
+    prepare: () => loadComplexDOM(),
+    setup: (iteration, list) => fillTodoList(list, 100),
+    mutate: (list, k) => {
+    const value = k & 1 ? "" : "completed";
+    for (const li of list.children)
+        li.className = value;
+},
+});
+</script>
+</body>
+</html>

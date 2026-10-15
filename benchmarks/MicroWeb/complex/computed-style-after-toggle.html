@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<!-- toggle 'completed' on one todo item then read getComputedStyle(label).textDecorationLine, in the Complex-DOM page -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 250,
+    prepare: () => loadComplexDOM(),
+    setup: (iteration, list) => { fillTodoList(list, 100); forceLayout(); return list; },
+    run: (list, iters) => {
+    let struck = 0;
+    for (let i = 0; i < iters; i++) {
+        const li = list.children[(i * 13) % 100];
+        li.classList.toggle("completed");
+        if (getComputedStyle(li.querySelector("label")).textDecorationLine.includes("line-through")) struck++;
+    }
+    if (!struck) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

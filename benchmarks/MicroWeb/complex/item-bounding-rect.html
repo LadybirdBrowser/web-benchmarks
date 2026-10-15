@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<!-- getBoundingClientRect of todo items in the settled Complex-DOM page (the driver's mouse-event coordinate lookup) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    prepare: () => loadComplexDOM(),
+    setup: (iteration, list) => { fillTodoList(list, 100); forceLayout(); return Array.from(list.children); },
+    run: (items, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += items[i % 100].getBoundingClientRect().height > 0 ? 1 : 0;
+    if (acc !== iters) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

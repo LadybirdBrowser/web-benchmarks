@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<!-- d3-scale linear ticks: tickIncrement via Math.log10/pow/floor, then generate and map ticks through the scale (Plot/Stockcharts axes) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    run: (ctx, iters) => {
+    const tickIncrement = (start, stop, count) => {
+        const step = (stop - start) / Math.max(0, count), power = Math.floor(Math.log10(step)), error = step / Math.pow(10, power);
+        const f = error >= 7.07 ? 10 : error >= 3.16 ? 5 : error >= 1.41 ? 2 : 1;
+        return power >= 0 ? f * Math.pow(10, power) : -Math.pow(10, -power) / f;
+    };
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const lo = i % 50, hi = 1000 + (i % 997);
+        const inc = tickIncrement(lo, hi, 10);
+        const r0 = Math.ceil(lo / inc), r1 = Math.floor(hi / inc);
+        for (let r = r0; r <= r1; r++) acc += ((r * inc - lo) / (hi - lo)) * 600;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

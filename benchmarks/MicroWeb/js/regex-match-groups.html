@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- str.match with capture groups and named groups (?<y>...) on rgb() colors and dates (d3-color parsing, timeParse) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => Array.from({ length: 64 }, (_, i) => i & 1 ? `rgb(${i}, ${(i * 2) & 255}, ${(i * 3) & 255})` : `2010-${String((i % 12) + 1).padStart(2, "0")}-${String((i % 28) + 1).padStart(2, "0")}`),
+    run: (inputs, iters) => {
+    const reColor = /^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/;
+    const reDate = /^(?<y>\d{4})-(?<m>\d{2})-(?<d>\d{2})$/;
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const s = inputs[i & 63];
+        const c = s.match(reColor);
+        if (c) acc += +c[1] + +c[3]; else { const d = s.match(reDate); acc += +d.groups.m + +d.groups.d; }
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

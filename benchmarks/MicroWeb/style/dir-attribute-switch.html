@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- flip dir='rtl'/'ltr' on a container of 200 items styled with logical properties (padding-inline, margin-inline-start, inset-inline-start), then force layout (NewsSite language switch) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => {
+    injectStyleOnce("logical", ".logical li { padding-inline: 12px 4px; margin-inline-start: 8px; position: relative; } .logical li::before { content: ''; position: absolute; inset-inline-start: 0; width: 4px; height: 4px; background: #333; }");
+    const list = buildList(200);
+    list.classList.add("logical");
+    return list;
+},
+    mutate: (list, k) => {
+    list.dir = k & 1 ? "ltr" : "rtl";
+},
+});
+</script>
+</body>
+</html>

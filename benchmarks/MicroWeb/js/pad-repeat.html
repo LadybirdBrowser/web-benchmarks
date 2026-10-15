@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<!-- padStart/padEnd/repeat building fixed-width labels and dates (date formatting, ascii tables) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 100000,
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += String(i % 12 + 1).padStart(2, "0").length + String(i & 1023).padEnd(6, ".").length + "-".repeat(i & 7).length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

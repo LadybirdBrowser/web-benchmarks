@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<!-- NewsSite dropdown: click() a hidden checkbox; :checked ~ label .chevron transform: translate(calc(var() * var())) rotate() and :checked ~ ul display; then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 50,
+    setup: () => {
+    injectStyleOnce("dropdown", `
+        :root { --dir: 1; --chevron-offset: 2px; }
+        .dropdown { position: relative; font: 14px sans-serif; }
+        .dropdown-toggle { position: absolute; opacity: 0; }
+        .dropdown-label { display: flex; align-items: center; gap: 4px; }
+        .chevron { display: inline-block; width: 8px; height: 8px; border-right: 2px solid; border-bottom: 2px solid; transform: translate(calc(var(--chevron-offset) * var(--dir)), 0) rotate(45deg); }
+        .dropdown-toggle:checked ~ .dropdown-label .chevron { transform: translate(calc(-1 * var(--chevron-offset) * var(--dir)), 0) rotate(-135deg); }
+        .dropdown-menu { display: none; list-style: none; margin: 0; padding: 0; }
+        .dropdown-toggle:checked ~ .dropdown-menu { display: block; }
+        .dropdown-menu li { padding-block: 4px; padding-inline: 8px; }
+    `);
+    let menu = "";
+    for (let i = 0; i < 12; i++) menu += `<li><a href="#/s${i}">Section ${i}</a></li>`;
+    let content = "";
+    for (let i = 0; i < 40; i++) content += `<p>Article paragraph ${i} with some text to lay out in the page body.</p>`;
+    sandbox().innerHTML = `<nav class="dropdown"><input id="dd" class="dropdown-toggle" type="checkbox"><label for="dd" class="dropdown-label">More<span class="chevron"></span></label><ul class="dropdown-menu">${menu}</ul></nav><main>${content}</main>`;
+    return sandbox().querySelector("#dd");
+},
+    mutate: (toggle, k) => {
+    toggle.click();
+},
+});
+</script>
+</body>
+</html>

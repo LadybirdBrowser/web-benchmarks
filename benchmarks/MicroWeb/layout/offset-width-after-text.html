@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- change a label's text then read its offsetWidth (measure-after-write in a 100-item list) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 300,
+    setup: () => { const list = buildList(100); forceLayout(); return Array.from(list.querySelectorAll('label')); },
+    run: (labels, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const label = labels[(i * 7) % 100];
+        label.textContent = "Measured label " + i;
+        acc += label.offsetWidth;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

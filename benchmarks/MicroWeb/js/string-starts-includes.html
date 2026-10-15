@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- indexOf/slice/startsWith/endsWith/includes on hash-route strings (NewsSite routing, jQuery selector fast paths) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => Array.from({ length: 64 }, (_, i) => `#/section/${["us", "world", "politics", "business"][i & 3]}/article-${i}?ref=nav`),
+    run: (urls, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const u = urls[i & 63];
+        const path = u.slice(2, u.indexOf("?"));
+        acc += path.length + (u.startsWith("#/section/w") ? 1 : 0) + (path.endsWith("-7") ? 1 : 0) + (u.includes("politics") ? 1 : 0);
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

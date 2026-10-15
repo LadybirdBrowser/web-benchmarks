@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- 'key' in obj, Object.hasOwn, hasOwnProperty.call and delete on a dictionary-like object (props diffing, caches) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => { const keys = []; for (let i = 0; i < 32; i++) keys.push("p" + i); return keys; },
+    run: (keys, iters) => {
+    const dict = {};
+    let hits = 0;
+    for (let i = 0; i < iters; i++) {
+        const k = keys[i & 31];
+        if (k in dict) hits++;
+        if (Object.hasOwn(dict, k)) hits++;
+        if (Object.prototype.hasOwnProperty.call(dict, k)) delete dict[k]; else dict[k] = i;
+    }
+    if (!hits) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

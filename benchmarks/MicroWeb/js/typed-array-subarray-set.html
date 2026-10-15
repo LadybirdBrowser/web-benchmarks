@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- Float64Array element writes plus subarray() + set() block copies (Plot/d3 channel arrays) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => ({ src: new Float64Array(256).map((_, i) => i * 0.5), dst: new Float64Array(512) }),
+    run: ({ src, dst }, iters) => {
+    let acc = 0;
+    for (let k = 0; k < iters; k++) {
+        src[k & 255] = k & 1023;
+        dst.set(src.subarray(k & 127, (k & 127) + 64), k & 255);
+        acc += dst[(k * 3) & 511];
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

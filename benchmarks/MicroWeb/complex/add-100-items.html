@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<!-- append 100 todo items to the Complex-DOM page's list, then force layout (Adding100Items) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 2,
+    prepare: () => loadComplexDOM(),
+    setup: (iteration, list) => { list.textContent = ""; forceLayout(); return list; },
+    mutate: (list, k) => {
+    for (let i = 0; i < 100; i++)
+        list.appendChild(makeTodoItem(k * 100 + i, false));
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<!-- wrap/unwrap the text of 100 paragraphs in <strong> (TipTap selectAll().setBold()), then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 4,
+    setup: () => {
+    sandbox().innerHTML = "<div contenteditable='true' style='width:600px;font:16px serif'></div>";
+    const editor = sandbox().firstChild;
+    for (let i = 0; i < 100; i++) { const p = document.createElement("p"); p.textContent = "Paragraph " + i + " of the long text, with enough words to wrap onto a second line in the editor."; editor.appendChild(p); }
+    return editor;
+},
+    mutate: (editor, k) => {
+    for (const p of editor.children) {
+        if (k & 1) {
+            const strong = p.firstChild;
+            p.replaceChildren(...strong.childNodes);
+        } else {
+            const strong = document.createElement("strong");
+            strong.append(...p.childNodes);
+            p.appendChild(strong);
+        }
+    }
+},
+});
+</script>
+</body>
+</html>

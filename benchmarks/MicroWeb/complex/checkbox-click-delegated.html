@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<!-- click() a todo checkbox in the Complex-DOM page; a delegated change handler toggles the item class and footer count; then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 30,
+    prepare: async () => {
+    const list = await loadComplexDOM();
+    fillTodoList(list, 100);
+    const count = document.querySelector(".todo-count strong");
+    let active = 100;
+    list.addEventListener("change", (event) => {
+        const done = event.target.closest("li").classList.toggle("completed");
+        active += done ? -1 : 1;
+        count.textContent = String(active);
+    });
+    return Array.from(list.querySelectorAll(".toggle"));
+},
+    setup: (iteration, toggles) => toggles,
+    mutate: (toggles, k) => {
+    toggles[(k * 37) % 100].click();
+},
+});
+</script>
+</body>
+</html>

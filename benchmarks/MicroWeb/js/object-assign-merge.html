@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<!-- Object.assign({}, defaults, props) with 6 default and 3 override properties (Chart.js/Plot option merging, Lit todos.update) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => {
+    const defaults = { color: "red", width: 1, visible: true, label: "", order: 0, stack: null };
+    const props = [];
+    for (let i = 0; i < 16; i++) props.push({ width: i, label: "l" + i, order: i * 2 });
+    return { defaults, props };
+},
+    run: ({ defaults, props }, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) acc += Object.assign({}, defaults, props[i & 15]).order;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

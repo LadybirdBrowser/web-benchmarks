@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<!-- change the width of an article with 6 headings and 30 paragraphs (~25k chars), then force layout (NewsSite article pages) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => {
+    sandbox().innerHTML = "<article style='font:16px/1.5 serif'></article>";
+    const article = sandbox().firstChild;
+    const words = "the quick brown fox jumps over the lazy dog while the committee debates the merits of the new transit plan".split(" ");
+    for (let i = 0; i < 30; i++) {
+        if (i % 5 === 0) { const h = document.createElement("h2"); h.textContent = "Section heading number " + i; article.appendChild(h); }
+        const s = []; for (let w = 0; w < 140; w++) s.push(words[(i * 7 + w * 3) % words.length]);
+        const p = document.createElement("p"); p.textContent = s.join(" "); article.appendChild(p);
+    }
+    return article;
+},
+    mutate: (article, k) => {
+    article.style.width = 500 + (k % 4) * 60 + "px";
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- list.textContent = '' on a 100-item list, then refill it with insertAdjacentHTML strings, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => buildList(100),
+    mutate: (list, k) => {
+    list.textContent = "";
+    let html = "";
+    for (let i = 0; i < 100; i++) html += todoItemHTML(i, (i + k) % 3 === 0);
+    list.insertAdjacentHTML("beforeend", html);
+},
+});
+</script>
+</body>
+</html>

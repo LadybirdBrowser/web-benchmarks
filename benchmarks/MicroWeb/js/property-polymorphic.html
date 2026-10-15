@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<!-- read 'id' and 'value' from objects of 4 different shapes at one site (vnode/fiber kinds) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 200000,
+    setup: () => {
+    const objects = [];
+    for (let i = 0; i < 400; i++) {
+        switch (i & 3) {
+        case 0: objects.push({ id: i, value: 1 }); break;
+        case 1: objects.push({ kind: "b", id: i, value: 2 }); break;
+        case 2: objects.push({ x: 0, y: 0, id: i, value: 3 }); break;
+        default: objects.push({ value: 4, id: i, extra: null, more: true });
+        }
+    }
+    return objects;
+},
+    run: (objects, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) { const o = objects[i % 400]; acc += o.id + o.value; }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

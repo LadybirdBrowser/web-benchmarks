@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<!-- document.elementFromPoint hit testing over 300 inline-block cells with clean layout (CodeMirror/TipTap layout step) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => {
+    injectStyleOnce("hit-cells", ".hcell { display: inline-block; width: 40px; height: 20px; margin: 1px; }");
+    sandbox().textContent = "";
+    for (let i = 0; i < 300; i++) { const d = document.createElement("div"); d.className = "hcell"; sandbox().appendChild(d); }
+    forceLayout();
+    return null;
+},
+    run: (ctx, iters) => {
+    let hits = 0;
+    for (let i = 0; i < iters; i++) {
+        const el = document.elementFromPoint(10 + (i * 37) % 600, 10 + (i * 11) % 120);
+        if (el && el.className === "hcell") hits++;
+    }
+    if (!hits) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<!-- insertRule of a fresh class rule into a live sheet (CodeMirror StyleModule pattern) with 300 elements in the page, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 30,
+    setup: () => {
+    let style = document.getElementById("dyn-sheet");
+    if (!style) { style = document.createElement("style"); style.id = "dyn-sheet"; document.head.appendChild(style); }
+    const sheet = style.sheet;
+    while (sheet.cssRules.length) sheet.deleteRule(0);
+    buildList(300);
+    return sheet;
+},
+    mutate: (sheet, k) => {
+    sheet.insertRule(`.gen${k} { color: rgb(${k & 255}, 0, 0); padding-left: ${k & 7}px; }`, sheet.cssRules.length);
+},
+});
+</script>
+</body>
+</html>

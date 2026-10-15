@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<!-- Perf-Dashboard ComponentBase: create a host, attachShadow({mode: 'closed'}), clone a cached template + <style> into it, query 3 elements by id -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => {
+    const template = document.createElement("template");
+    template.innerHTML = "<style>.pane{display:flex}</style><div class='pane'><h1 id='title'></h1><canvas id='chart' width=10 height=10></canvas><ul id='legend'></ul></div>";
+    sandbox().textContent = "";
+    return template;
+},
+    run: (template, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const host = document.createElement("div");
+        const root = host.attachShadow({ mode: "closed" });
+        root.appendChild(template.content.cloneNode(true));
+        root.getElementById("title").textContent = "Chart " + i;
+        acc += root.getElementById("chart") ? 1 : 0;
+        acc += root.getElementById("legend") ? 1 : 0;
+        if ((i & 63) === 0) sandbox().textContent = "";
+        sandbox().appendChild(host);
+    }
+    if (acc !== 2 * iters) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

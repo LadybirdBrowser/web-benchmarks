@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- fn.call(ctx, a, b), fn.apply(ctx, [a, b]) and fn.apply(ctx, arguments) forwarding (Backbone/jQuery event triggering) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => {
+    const ctx = { base: 3 };
+    function add(a, b) { return this.base + a + b; }
+    function forward() { return add.apply(ctx, arguments); }
+    return { ctx, add, forward };
+},
+    run: ({ ctx, add, forward }, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += add.call(ctx, i & 7, 1) + add.apply(ctx, [i & 3, 2]) + forward(i & 1, 3);
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

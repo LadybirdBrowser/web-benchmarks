@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- change grid-template-columns of a 120-item text grid, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 20,
+    setup: () => {
+    sandbox().innerHTML = "<div style='display:grid;gap:4px;width:700px;font:13px sans-serif'></div>";
+    const grid = sandbox().firstChild;
+    for (let i = 0; i < 120; i++) { const d = document.createElement("div"); d.textContent = "Card " + i + " with a short headline"; grid.appendChild(d); }
+    return grid;
+},
+    mutate: (grid, k) => {
+    grid.style.gridTemplateColumns = ["repeat(3, 1fr)", "repeat(4, 1fr)", "200px 1fr 1fr", "repeat(auto-fill, minmax(150px, 1fr))"][k & 3];
+},
+});
+</script>
+</body>
+</html>

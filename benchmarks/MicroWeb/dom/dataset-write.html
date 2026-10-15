@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<!-- dataset property write on attached elements (Angular/Lit attribute bindings) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => Array.from(fillTodoList(buildList(0), 100).children),
+    run: (items, iters) => {
+    for (let i = 0; i < iters; i++)
+        items[i % 100].dataset.priority = String(i % 5);
+    if (items[1].dataset.priority === undefined) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

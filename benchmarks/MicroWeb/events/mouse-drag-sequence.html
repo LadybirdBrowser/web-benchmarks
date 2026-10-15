@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<!-- mousedown + 10 mousemove + mouseup with coordinates from getBoundingClientRect (the driver's dispatchMouseEvent; PanTheChart/SelectingRange) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1000,
+    setup: () => {
+    sandbox().innerHTML = "<div style='margin:20px;width:600px;height:300px'></div>";
+    const target = sandbox().firstChild;
+    const state = { dx: 0, down: false };
+    target.addEventListener("mousedown", (e) => { state.down = true; state.x = e.clientX; });
+    target.addEventListener("mousemove", (e) => { if (state.down) state.dx += e.clientX - state.x; });
+    target.addEventListener("mouseup", () => { state.down = false; });
+    return { target, state };
+},
+    run: ({ target, state }, iters) => {
+    const fire = (type, x, y) => {
+        const r = target.getBoundingClientRect();
+        target.dispatchEvent(new MouseEvent(type, { clientX: r.x + x, clientY: r.y + y, bubbles: true, cancelable: true }));
+    };
+    for (let i = 0; i < iters; i++) {
+        fire("mousedown", 100, 100);
+        for (let m = 0; m < 10; m++) fire("mousemove", 100 + m * 5, 100);
+        fire("mouseup", 150, 100);
+    }
+    if (!state.dx) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

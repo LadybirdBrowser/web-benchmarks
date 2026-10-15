@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<!-- move existing todo items between two attached lists with appendChild (keyed list moves) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => {
+    const a = buildList(100);
+    const b = document.createElement("ul");
+    sandbox().appendChild(b);
+    return { a, b };
+},
+    run: ({ a, b }, iters) => {
+    for (let i = 0; i < iters; i++) {
+        const from = i & 1 ? b : a, to = i & 1 ? a : b;
+        if (from.firstChild) to.appendChild(from.firstChild);
+    }
+    if (a.childElementCount + b.childElementCount !== 100) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

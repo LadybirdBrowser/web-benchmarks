@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<!-- new Date(string) parsing of ISO and RFC-ish date strings + getTime (Perf-Dashboard data, chart CSVs) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => ["2021-03-04T05:06:07Z", "2021-03-04", "Thu, 04 Mar 2021 05:06:07 GMT", "2021-03-04T05:06:07.123+02:00"],
+    run: (strings, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) acc += new Date(strings[i & 3]).getTime() % 1000;
+    if (Number.isNaN(acc)) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

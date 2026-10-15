@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- async function awaiting another async function (2 awaits deep), 10000 calls in sequence -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1,
+    run: async (ctx, iters) => {
+    const leaf = async (x) => { await null; return x + 1; };
+    const mid = async (x) => (await leaf(x)) * 2;
+    let acc = 0;
+    for (let i = 0; i < 10000; i++) acc += await mid(i & 7);
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

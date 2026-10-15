@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<!-- edit text nodes in a contenteditable observed by a characterData+childList MutationObserver; await record delivery per batch of 20 edits (ProseMirror/CodeMirror DOM observer) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 500,
+    setup: () => {
+    sandbox().innerHTML = "<div contenteditable='true'></div>";
+    const editor = sandbox().firstChild;
+    for (let i = 0; i < 20; i++) { const p = document.createElement("p"); p.textContent = "line " + i; editor.appendChild(p); }
+    const state = { records: 0, resolve: null };
+    const observer = new MutationObserver((records) => { state.records += records.length; if (state.resolve) { const r = state.resolve; state.resolve = null; r(); } });
+    observer.observe(editor, { characterData: true, childList: true, subtree: true, characterDataOldValue: true });
+    return { texts: Array.from(editor.children, (p) => p.firstChild), state };
+},
+    run: async ({ texts, state }, iters) => {
+    for (let k = 0; k < iters; k++) {
+        const delivered = new Promise((resolve) => { state.resolve = resolve; });
+        for (let i = 0; i < 20; i++) texts[i].data = "line " + i + " edit " + k;
+        await delivered;
+    }
+    if (state.records !== 20 * iters) throw new Error("bad result " + state.records);
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<!-- construct the TodoMVC-WebComponents todo-item: importNode(template) into an open shadow root with adoptedStyleSheets, 7 querySelectors, 3 observed attributes, append -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 500,
+    setup: () => {
+    if (!window.TodoItem) {
+        const template = document.createElement("template");
+        template.innerHTML = '<li class="todo-item"><div class="display-todo"><label class="toggle-todo-label"><input class="toggle-todo-input" type="checkbox"></label><span class="todo-item-text" tabindex="0"></span><button class="remove-todo-button"></button></div><div class="edit-todo-container"><label class="edit-todo-label"></label><input class="edit-todo-input" type="text"></div></li>';
+        const sheet = new CSSStyleSheet();
+        sheet.replaceSync(".todo-item{position:relative;font-size:24px;border-bottom:1px solid #ededed}.todo-item.completed .todo-item-text{color:#949494;text-decoration:line-through}.toggle-todo-input{width:40px;height:40px}.edit-todo-container{display:none}");
+        window.TodoItem = class extends HTMLElement {
+            static get observedAttributes() { return ["itemid", "itemtitle", "itemcompleted"]; }
+            constructor() {
+                super();
+                const node = document.importNode(template.content, true);
+                this.item = node.querySelector(".todo-item");
+                this.toggleLabel = node.querySelector(".toggle-todo-label");
+                this.toggleInput = node.querySelector(".toggle-todo-input");
+                this.todoText = node.querySelector(".todo-item-text");
+                this.todoButton = node.querySelector(".remove-todo-button");
+                this.editLabel = node.querySelector(".edit-todo-label");
+                this.editInput = node.querySelector(".edit-todo-input");
+                this.shadow = this.attachShadow({ mode: "open" });
+                this.shadow.adoptedStyleSheets = [sheet];
+                this.shadow.append(node);
+            }
+            attributeChangedCallback(name, oldValue, newValue) {
+                if (name === "itemtitle") { this.todoText.textContent = newValue; this.editInput.value = newValue; }
+                else if (name === "itemcompleted") this.toggleInput.checked = newValue === "true";
+            }
+        };
+        customElements.define("todo-item", window.TodoItem);
+    }
+    sandbox().innerHTML = "<ul></ul>";
+    return sandbox().firstChild;
+},
+    run: (list, iters) => {
+    for (let i = 0; i < iters; i++) {
+        const element = new TodoItem();
+        element.setAttribute("itemid", String(i));
+        element.setAttribute("itemtitle", todoTitle(i));
+        element.setAttribute("itemcompleted", "false");
+        list.append(element);
+        element.setAttribute("data-priority", String(4 - (i % 5)));
+    }
+    if (list.childElementCount !== iters) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

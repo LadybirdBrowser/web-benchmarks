@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- className read + classList.contains on attached items (jQuery hasClass, Backbone) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => Array.from(fillTodoList(buildList(0), 100, 3).children),
+    run: (items, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const li = items[i % 100];
+        acc += li.className.length + (li.classList.contains("completed") ? 1 : 0);
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- append a todo item, then document.querySelectorAll('.destroy') on the Complex-DOM page (query after DOM change) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 400,
+    prepare: () => loadComplexDOM(),
+    setup: (iteration, list) => fillTodoList(list, 100),
+    run: (list, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        list.appendChild(makeTodoItem(100 + i, false));
+        acc += document.querySelectorAll(".destroy").length;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

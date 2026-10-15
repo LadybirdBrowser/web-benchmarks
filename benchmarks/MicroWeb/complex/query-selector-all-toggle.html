@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- document.querySelectorAll('.toggle') on the ~6600-element Complex-DOM page (the Speedometer driver's lookup) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 500,
+    prepare: () => loadComplexDOM(),
+    setup: (iteration, list) => fillTodoList(list, 100),
+    run: (list, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const all = document.querySelectorAll(".toggle");
+        acc += all.length;
+    }
+    if (acc !== 100 * iters) throw new Error("bad result " + acc);
+},
+});
+</script>
+</body>
+</html>

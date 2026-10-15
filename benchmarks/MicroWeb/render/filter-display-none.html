@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<!-- filter a 100-item list by setting style.display on every item (web-components/ES5 filtering), then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 20,
+    setup: () => Array.from(buildList(100).children),
+    mutate: (items, k) => {
+    for (let i = 0; i < 100; i++)
+        items[i].style.display = (i + k) % 3 === 0 ? "none" : "";
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- replace(/\{\{(\w+)\}\}/g, (_, key) => values[key]) template interpolation of a todo item template -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 10000,
+    setup: () => ({
+    template: '<li data-id="{{id}}" class="{{completed}}"><div class="view"><input class="toggle" type="checkbox" {{checked}}><label>{{title}}</label><button class="destroy"></button></div></li>',
+    values: Array.from({ length: 32 }, (_, i) => ({ id: i, completed: i & 1 ? "completed" : "", checked: i & 1 ? "checked" : "", title: todoTitle(i) })),
+}),
+    run: ({ template, values }, iters) => {
+    const re = /\{\{(\w+)\}\}/g;
+    let acc = 0;
+    for (let i = 0; i < iters; i++) { const v = values[i & 31]; acc += template.replace(re, (_, key) => v[key]).length; }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

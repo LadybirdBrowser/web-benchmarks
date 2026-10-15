@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<!-- React hooks emulation: per-render cursor into a state-cell array, useState returning [value, setter] tuples, useMemo dependency comparison -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => {
+    const cells = [];
+    let cursor = 0;
+    const useState = (init) => { const i = cursor++; if (cells.length <= i) cells.push(init); return [cells[i], (v) => { cells[i] = v; }]; };
+    const useMemo = (fn, deps) => { const i = cursor++; const prev = cells[i]; if (prev && prev.deps.length === deps.length && prev.deps.every((d, k) => d === deps[k])) return prev.value; const value = fn(); cells[i] = { deps, value }; return value; };
+    const render = (props) => {
+        cursor = 0;
+        const [count, setCount] = useState(0);
+        const [text] = useState("todo");
+        const label = useMemo(() => text + " " + props.id, [text, props.id]);
+        setCount(count + 1);
+        return label.length + count;
+    };
+    return render;
+},
+    run: (render, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) acc += render({ id: i & 7 });
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

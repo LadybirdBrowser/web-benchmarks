@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<!-- lit-html TemplateInstance: importNode of a template with <!--?lit$...$--> markers, TreeWalker walk to find parts, insert child-part text nodes, set attribute/property parts -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => {
+    const template = document.createElement("template");
+    template.innerHTML = '<li class="todo"><div class="view"><input class="toggle" type="checkbox"><label><!--?lit$1234$--></label><button class="destroy"></button></div><input class="edit" type="text"></li>';
+    sandbox().innerHTML = "<ul></ul>";
+    return { template, list: sandbox().firstChild };
+},
+    run: ({ template, list }, iters) => {
+    let parts = 0;
+    for (let i = 0; i < iters; i++) {
+        const fragment = document.importNode(template.content, true);
+        const walker = document.createTreeWalker(fragment, 129);
+        let node, li = null, toggle = null;
+        while ((node = walker.nextNode()) !== null) {
+            if (node.nodeType === 8) {
+                node.parentNode.insertBefore(document.createTextNode(todoTitle(i)), node);
+                parts++;
+            } else if (node.localName === "li") li = node;
+            else if (node.className === "toggle") toggle = node;
+        }
+        li.setAttribute("class", i & 1 ? "todo completed" : "todo");
+        toggle.checked = (i & 1) === 1;
+        list.appendChild(fragment);
+    }
+    if (parts !== iters) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

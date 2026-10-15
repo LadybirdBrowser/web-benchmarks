@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- Backbone TodoView.render: li.innerHTML = item template on 100 existing items, then force layout once -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => {
+    const list = buildList(100);
+    return Array.from(list.children);
+},
+    mutate: (items, k) => {
+    for (let i = 0; i < 100; i++) {
+        const title = todoTitle(i + k);
+        items[i].innerHTML = `<div class="view"><input class="toggle" type="checkbox"${(i + k) & 1 ? " checked" : ""}><label>${title}</label><button class="destroy"></button></div><input class="edit" value="${title}">`;
+    }
+},
+});
+</script>
+</body>
+</html>

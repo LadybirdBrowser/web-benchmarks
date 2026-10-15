@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<!-- Preact diffProps: compare old/new props objects key by key and apply className, style object, data-* and event-handler props to an element -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => {
+    const el = document.createElement("li");
+    const handlers = [() => 1, () => 2];
+    const propsList = [];
+    for (let i = 0; i < 8; i++)
+        propsList.push({ class: i & 1 ? "completed" : "", "data-priority": String(i % 5), style: { opacity: i & 2 ? "0.5" : "1" }, onClick: handlers[i & 1], title: "t" + (i & 3) });
+    return { el, propsList };
+},
+    run: ({ el, propsList }, iters) => {
+    let old = {}, applied = 0;
+    for (let i = 0; i < iters; i++) {
+        const props = propsList[i & 7];
+        for (const name in old) if (!(name in props)) { el.removeAttribute(name); applied++; }
+        for (const name in props) {
+            const value = props[name];
+            if (old[name] === value) continue;
+            if (name === "class") el.className = value;
+            else if (name === "style") { for (const s in value) el.style[s] = value[s]; }
+            else if (name[0] === "o" && name[1] === "n") el["l" + name.slice(2).toLowerCase()] = value;
+            else el.setAttribute(name, value);
+            applied++;
+        }
+        old = props;
+    }
+    if (!applied) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

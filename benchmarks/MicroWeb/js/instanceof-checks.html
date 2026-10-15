@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<!-- instanceof against a 3-level class hierarchy and built-ins (ProseMirror Node/Mark checks, Plot mark dispatch) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 200000,
+    setup: () => {
+    class Base {} class Mid extends Base {} class Leaf extends Mid {}
+    const values = [new Leaf(), new Mid(), new Base(), [], {}, new Map(), "s", 1];
+    return { values, Base, Mid, Leaf };
+},
+    run: ({ values, Base, Mid, Leaf }, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const v = values[i & 7];
+        if (v instanceof Leaf) acc += 3; else if (v instanceof Mid) acc += 2; else if (v instanceof Base) acc += 1; else if (v instanceof Array) acc += 4; else if (v instanceof Map) acc += 5;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

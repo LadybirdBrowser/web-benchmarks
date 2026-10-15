@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<!-- React/Preact createElement: build a 6-node vnode tree per todo item with props objects, keys and children arrays -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => {
+    const h = (type, props, ...children) => ({ type, props: props || {}, key: props && props.key !== undefined ? props.key : null, children, ref: null, _dom: null });
+    return h;
+},
+    run: (h, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const vnode = h("li", { key: i, className: i & 1 ? "completed" : "" },
+            h("div", { className: "view" },
+                h("input", { className: "toggle", type: "checkbox", checked: (i & 1) === 1, onChange: null }),
+                h("label", { onDblClick: null }, "Todo " + (i & 63)),
+                h("button", { className: "destroy", onClick: null })));
+        acc += vnode.children[0].children.length;
+    }
+    if (acc !== 3 * iters) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

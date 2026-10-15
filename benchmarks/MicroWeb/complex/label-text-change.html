@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<!-- change one todo label's text in the Complex-DOM page, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 30,
+    prepare: () => loadComplexDOM(),
+    setup: (iteration, list) => { fillTodoList(list, 100); return Array.from(list.querySelectorAll("label")); },
+    mutate: (labels, k) => {
+    labels[(k * 37) % 100].textContent = todoTitle(k + 1000);
+},
+});
+</script>
+</body>
+</html>

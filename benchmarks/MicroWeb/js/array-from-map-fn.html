@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- Array.from(arrayLike, mapFn) and [...set] on 32-element sources (Array.from(nodeList), [...new Set()]) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => {
+    const set = new Set();
+    const arrayLike = { length: 32 };
+    for (let i = 0; i < 32; i++) { set.add(i * 3); arrayLike[i] = i; }
+    return { set, arrayLike };
+},
+    run: ({ set, arrayLike }, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += [...set][i & 31] + Array.from(arrayLike, (v) => v * 2)[(i * 5) & 31];
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

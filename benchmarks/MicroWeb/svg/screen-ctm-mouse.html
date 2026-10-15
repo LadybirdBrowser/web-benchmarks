@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- convert mouse coordinates with svg.getScreenCTM().inverse() + DOMPoint.matrixTransform (chart crosshair hit testing) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => { const svg = makeSVG(10); forceLayout(); return svg; },
+    run: (svg, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const point = new DOMPoint(100 + (i & 63), 50).matrixTransform(svg.getScreenCTM().inverse());
+        acc += point.x;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

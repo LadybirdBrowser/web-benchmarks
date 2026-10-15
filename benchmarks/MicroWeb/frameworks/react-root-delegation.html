@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<!-- React 17 root event delegation: one native click listener on the root walks target.parentNode collecting __reactProps$ handlers and calls them with a synthetic event -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => {
+    const list = buildList(100);
+    const key = "__reactProps$x1y2z3";
+    let toggled = 0;
+    for (const li of list.children) {
+        li[key] = { className: "", children: null };
+        li.firstChild[key] = { className: "view" };
+        li.querySelector(".toggle")[key] = { onClick: () => { toggled++; }, onChange: () => {} };
+    }
+    const root = sandbox();
+    if (!root.reactListener) {
+        root.reactListener = (nativeEvent) => {
+            const listeners = [];
+            for (let node = nativeEvent.target; node && node !== root; node = node.parentNode) {
+                const props = node[key];
+                if (props && typeof props.onClick === "function") listeners.push([node, props.onClick]);
+            }
+            const synthetic = { nativeEvent, type: nativeEvent.type, target: nativeEvent.target, currentTarget: null };
+            for (const [node, listener] of listeners) { synthetic.currentTarget = node; listener(synthetic); }
+        };
+        root.addEventListener("click", root.reactListener);
+    }
+    return { toggles: Array.from(list.querySelectorAll(".toggle")), count: () => toggled };
+},
+    run: ({ toggles, count }, iters) => {
+    for (let i = 0; i < iters; i++)
+        toggles[i % 100].dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+    if (count() !== iters) throw new Error("bad result " + count());
+},
+});
+</script>
+</body>
+</html>

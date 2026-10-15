@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<!-- click() on todo checkboxes: activation flips checked and fires click, input and change; delegated listeners on the list -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => {
+    const list = buildList(100);
+    const counts = { click: 0, change: 0, input: 0 };
+    list.addEventListener("click", (e) => { if (e.target.classList.contains("toggle")) counts.click++; });
+    list.addEventListener("input", () => { counts.input++; });
+    list.addEventListener("change", (e) => { if (e.target.closest("li")) counts.change++; });
+    return { toggles: Array.from(list.querySelectorAll(".toggle")), counts };
+},
+    run: ({ toggles, counts }, iters) => {
+    for (let i = 0; i < iters; i++)
+        toggles[i % 100].click();
+    if (counts.click !== iters || counts.change !== iters) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

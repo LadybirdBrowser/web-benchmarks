@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<!-- parse 'YYYY-MM-DD' with a regexp into Date.UTC, then read UTC fields (React-Stockcharts timeParse over data.tsv) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => {
+    const strings = [];
+    for (let i = 0; i < 365; i++) strings.push(new Date(Date.UTC(2010, 0, 1 + i)).toISOString().slice(0, 10));
+    return strings;
+},
+    run: (strings, iters) => {
+    const re = /^(\d{4})-(\d{2})-(\d{2})$/;
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const m = re.exec(strings[i % 365]);
+        const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+        acc += d.getUTCFullYear() + d.getUTCMonth() + d.getUTCDate();
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

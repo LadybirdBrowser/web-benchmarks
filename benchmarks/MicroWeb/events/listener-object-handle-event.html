@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<!-- dispatch to listeners registered as objects with handleEvent (Lit/Backbone/Ember style) plus once:true listeners re-added -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => {
+    const target = document.createElement("button");
+    sandbox().appendChild(target);
+    const handler = { count: 0, handleEvent(e) { this.count += e.type === "click" ? 1 : 0; } };
+    target.addEventListener("click", handler);
+    return { target, handler };
+},
+    run: ({ target, handler }, iters) => {
+    let once = 0;
+    for (let i = 0; i < iters; i++) {
+        if ((i & 7) === 0) target.addEventListener("click", () => { once++; }, { once: true });
+        target.dispatchEvent(new Event("click"));
+    }
+    if (handler.count < iters || !once) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

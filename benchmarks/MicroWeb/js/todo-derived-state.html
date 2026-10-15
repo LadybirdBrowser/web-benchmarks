@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- TodoMVC derived state over 100 todos: filter(!completed).length, every(completed), some(completed), find(id) per op -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => Array.from({ length: 100 }, (_, i) => ({ id: i, title: todoTitle(i), completed: i % 3 === 0 })),
+    run: (todos, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        todos[i % 100].completed = !todos[i % 100].completed;
+        acc += todos.filter((t) => !t.completed).length + (todos.every((t) => t.completed) ? 1 : 0) + (todos.some((t) => t.completed) ? 1 : 0) + todos.find((t) => t.id === (i % 100)).id;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

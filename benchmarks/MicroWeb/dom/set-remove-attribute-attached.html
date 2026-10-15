@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- setAttribute + removeAttribute pair on attached todo items -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => Array.from(fillTodoList(buildList(0), 100).children),
+    run: (items, iters) => {
+    for (let i = 0; i < iters; i++) {
+        const li = items[i % 100];
+        li.setAttribute("aria-checked", "v" + (i & 3));
+        li.removeAttribute("aria-checked");
+    }
+    if (items[3].hasAttribute("aria-checked")) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

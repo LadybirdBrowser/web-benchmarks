@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- class with #private fields and a #private method used through public methods (TodoMVC-WebComponents #data/#elements) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 100000,
+    setup: () => class Store {
+    #items = [];
+    #count = 0;
+    #bump() { this.#count++; }
+    add(x) { this.#items.push(x); this.#bump(); if (this.#items.length > 64) this.#items.length = 0; }
+    get count() { return this.#count; }
+},
+    run: (Store, iters) => {
+    const store = new Store();
+    for (let i = 0; i < iters; i++) store.add(i);
+    if (store.count !== iters) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

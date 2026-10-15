@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<!-- createTreeWalker(SHOW_COMMENT) search through a 100-item list with comment anchors (Lit/Vue hydration) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1000,
+    setup: () => {
+    const list = buildList(100);
+    for (const li of list.children) li.firstChild.insertBefore(document.createComment("?lit$1$"), li.firstChild.firstChild);
+    return list;
+},
+    run: (list, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const walker = document.createTreeWalker(list, NodeFilter.SHOW_COMMENT);
+        while (walker.nextNode()) acc++;
+    }
+    if (acc !== 100 * iters) throw new Error("bad result " + acc);
+},
+});
+</script>
+</body>
+</html>

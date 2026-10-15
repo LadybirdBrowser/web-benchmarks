@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<!-- Redux-style reducer: switch on action.type strings returning new state objects (React-Redux TodoMVC) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 200000,
+    setup: () => {
+    const types = ["ADD_TODO", "TOGGLE_TODO", "DELETE_TODO", "EDIT_TODO", "SET_FILTER", "CLEAR_COMPLETED", "UNKNOWN"];
+    return types.map((type, i) => ({ type, id: i, text: "t" + i, filter: "all" }));
+},
+    run: (actions, iters) => {
+    let state = { count: 0, filter: "all", last: null };
+    for (let i = 0; i < iters; i++) {
+        const action = actions[i % 7];
+        switch (action.type) {
+        case "ADD_TODO": state = { ...state, count: state.count + 1, last: action.text }; break;
+        case "TOGGLE_TODO": state = { ...state, last: action.id }; break;
+        case "DELETE_TODO": state = { ...state, count: state.count - 1 }; break;
+        case "EDIT_TODO": state = { ...state, last: action.text }; break;
+        case "SET_FILTER": state = { ...state, filter: action.filter }; break;
+        case "CLEAR_COMPLETED": state = { ...state, count: state.count }; break;
+        default: break;
+        }
+    }
+    if (state.count !== 0 && !state.last) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

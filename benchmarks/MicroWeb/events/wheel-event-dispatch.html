@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- new WheelEvent('wheel', {deltaY, clientX, clientY}) dispatched on a chart; handler reads deltaY/clientX and calls preventDefault (React-Stockcharts ZoomTheChart) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => {
+    sandbox().innerHTML = "<div style='width:600px;height:300px'></div>";
+    const chart = sandbox().firstChild;
+    const counts = { zoom: 0 };
+    chart.addEventListener("wheel", (e) => { counts.zoom += e.deltaY < 0 ? 1 : 0; e.preventDefault(); }, { passive: false });
+    return { chart, counts };
+},
+    run: ({ chart, counts }, iters) => {
+    for (let i = 0; i < iters; i++)
+        chart.dispatchEvent(new WheelEvent("wheel", { deltaY: -10, clientX: 100 + (i & 63), clientY: 100, bubbles: true, cancelable: true }));
+    if (counts.zoom !== iters) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

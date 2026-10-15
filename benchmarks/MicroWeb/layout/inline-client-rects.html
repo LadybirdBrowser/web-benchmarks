@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<!-- getClientRects of wrapped inline <span>s in a settled paragraph (tooltips, editors' line measurement) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => {
+    let html = "";
+    for (let i = 0; i < 50; i++) html += `<span>wrapped inline span number ${i} with several words </span>`;
+    sandbox().innerHTML = `<p style="width:300px;font:14px sans-serif">${html}</p>`;
+    forceLayout();
+    return Array.from(sandbox().querySelectorAll("span"));
+},
+    run: (spans, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += spans[i % 50].getClientRects().length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

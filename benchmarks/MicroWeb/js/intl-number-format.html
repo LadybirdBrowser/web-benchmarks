@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<!-- Intl.NumberFormat.format with cached formatters (unit kilometer; grouping) (Charts-chartjs ticks) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 5000,
+    setup: () => ({ unit: new Intl.NumberFormat("en-US", { style: "unit", unit: "kilometer", maximumFractionDigits: 1 }), plain: new Intl.NumberFormat("en-US") }),
+    run: ({ unit, plain }, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) acc += unit.format(i * 12.5).length + plain.format(i * 1001).length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<!-- create 300 <rect> bars with x/y/width/height/fill attributes and a <title> child each (observable-plot barY), then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 3,
+    setup: () => makeSVG(0),
+    mutate: (svg, k) => {
+    svg.textContent = "";
+    const g = document.createElementNS(SVG_NS, "g");
+    g.setAttribute("fill", "steelblue");
+    for (let i = 0; i < 300; i++) {
+        const rect = document.createElementNS(SVG_NS, "rect");
+        rect.setAttribute("x", String((i * 2) % 600));
+        rect.setAttribute("y", String(300 - ((i * 13 + k) % 250)));
+        rect.setAttribute("width", "1.5");
+        rect.setAttribute("height", String((i * 13 + k) % 250));
+        rect.setAttribute("fill", i & 1 ? "#4e79a7" : "#f28e2c");
+        const title = document.createElementNS(SVG_NS, "title");
+        title.textContent = "AK\n" + i;
+        rect.appendChild(title);
+        g.appendChild(rect);
+    }
+    svg.appendChild(g);
+},
+});
+</script>
+</body>
+</html>

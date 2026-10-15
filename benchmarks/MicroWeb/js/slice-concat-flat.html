@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<!-- slice, concat and flat on small arrays (immutable list updates, Plot channel concatenation) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => ({ a: Array.from({ length: 24 }, (_, i) => i), b: [100, 101, 102, 103], nested: [[1, 2], [3, [4, 5]], [6]] }),
+    run: ({ a, b, nested }, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) acc += a.slice(i & 7, 20).length + a.concat(b).length + nested.flat().length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

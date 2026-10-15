@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- remove 100 todo items last to first in the Complex-DOM page, then force layout; 10 rounds -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 10,
+    prepare: () => loadComplexDOM(),
+    setup: (iteration, list) => { fillTodoList(list, 1000); forceLayout(); return list; },
+    run: (list, iters) => {
+    for (let round = 0; round < iters; round++) {
+        for (let i = 0; i < 100; i++)
+            list.lastElementChild.remove();
+        forceLayout();
+    }
+    if (list.childElementCount !== 0) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

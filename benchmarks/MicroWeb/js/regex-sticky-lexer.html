@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<!-- lexer trying 5 sticky /y regexps at each position (Lezer external tokenizers, marked, template compilers) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => Array.from({ length: 32 }, (_, i) => `let x${i} = foo(bar, ${i * 17}) + \"s\" + baz.qux;`),
+    run: (lines, iters) => {
+    const rules = [/\s+/y, /[A-Za-z_$][\w$]*/y, /\d+/y, /"[^"]*"/y, /[=+(),.;]/y];
+    let tokens = 0;
+    for (let k = 0; k < iters; k++) {
+        const s = lines[k & 31];
+        let pos = 0;
+        while (pos < s.length) {
+            let matched = false;
+            for (const re of rules) { re.lastIndex = pos; const m = re.exec(s); if (m) { pos += m[0].length; tokens++; matched = true; break; } }
+            if (!matched) pos++;
+        }
+    }
+    if (!tokens) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

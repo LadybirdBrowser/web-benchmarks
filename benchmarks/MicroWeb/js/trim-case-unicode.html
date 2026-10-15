@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- trim + toLowerCase + toUpperCase of short strings mixing ASCII, Japanese and Cyrillic (todo input handling) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => Array.from({ length: 64 }, (_, i) => "  " + todoTitle(i) + " Item  "),
+    run: (inputs, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const s = inputs[i & 63];
+        acc += s.trim().length + s.toLowerCase().length + ((i & 7) ? 0 : s.toUpperCase().length);
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

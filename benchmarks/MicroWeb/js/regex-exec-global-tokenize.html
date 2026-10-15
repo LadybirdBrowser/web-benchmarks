@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- tokenize JS lines with a global alternation regexp in an exec() loop (template compilers, legacy highlighters) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => Array.from({ length: 32 }, (_, i) => `const value${i} = compute(${i}, \"str${i}\") + other.prop[${i & 3}]; // note`),
+    run: (lines, iters) => {
+    const re = /([A-Za-z_$][\w$]*)|(\d+(?:\.\d+)?)|("(?:[^"\\]|\\.)*")|(\/\/.*$)|([^\s\w])/g;
+    let tokens = 0;
+    for (let k = 0; k < iters; k++) {
+        const s = lines[k & 31];
+        re.lastIndex = 0;
+        let m;
+        while ((m = re.exec(s)) !== null) tokens += m[1] ? 2 : 1;
+    }
+    if (!tokens) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

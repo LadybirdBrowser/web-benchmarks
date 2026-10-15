@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- Function.prototype.bind (fresh every 16th call, with a bound argument) and calls through bound functions (React class handlers, _.bindAll) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 100000,
+    setup: () => {
+    const obj = { x: 2, get(y) { return this.x + y; } };
+    return { obj, bound: obj.get.bind(obj) };
+},
+    run: ({ obj, bound }, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        acc += bound(i & 7);
+        if ((i & 15) === 0) acc += obj.get.bind(obj, 1)();
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

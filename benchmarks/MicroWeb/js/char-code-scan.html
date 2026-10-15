@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<!-- hand-written tokenizer loop classifying characters with charCodeAt over 64-char source lines (Lezer/CodeMirror, d3-dsv) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 10000,
+    setup: () => Array.from({ length: 64 }, (_, i) => `function f${i}(a, b) { return a + b * ${i} - Math.max(a, ${i * 3}); } // note`),
+    run: (lines, iters) => {
+    let idents = 0;
+    for (let k = 0; k < iters; k++) {
+        const s = lines[k & 63];
+        let inIdent = false;
+        for (let i = 0; i < s.length; i++) {
+            const c = s.charCodeAt(i);
+            const isIdent = (c >= 97 && c <= 122) || (c >= 65 && c <= 90) || c === 95 || (inIdent && c >= 48 && c <= 57);
+            if (isIdent && !inIdent) idents++;
+            inIdent = isIdent;
+        }
+    }
+    if (!idents) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

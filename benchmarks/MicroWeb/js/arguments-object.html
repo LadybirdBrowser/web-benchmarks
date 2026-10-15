@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- functions reading arguments.length/arguments[i] and Array.prototype.slice.call(arguments) (jQuery/Underscore/Backbone) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 50000,
+    setup: () => {
+    function variadic() { let s = arguments.length; for (let i = 0; i < arguments.length; i++) s += arguments[i]; return s; }
+    function sliced() { return Array.prototype.slice.call(arguments, 1).length; }
+    return { variadic, sliced };
+},
+    run: ({ variadic, sliced }, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) acc += variadic(i & 3, 1, 2) + sliced(1, 2, i & 1);
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

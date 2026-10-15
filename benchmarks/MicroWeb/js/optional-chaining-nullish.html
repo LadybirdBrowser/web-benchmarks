@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- optional chaining a?.b?.c, optional calls fn?.() and ?? defaults over sparse option objects (modern framework/build output) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 200000,
+    setup: () => [{ a: { b: { c: 1 } }, fn: () => 2 }, { a: null }, { a: { b: null }, fn: null }, {}, { a: { b: { c: 0 } }, d: 5 }],
+    run: (objects, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const o = objects[i % 5];
+        acc += (o.a?.b?.c ?? 7) + (o.fn?.() ?? 1) + (o.d ?? 0);
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

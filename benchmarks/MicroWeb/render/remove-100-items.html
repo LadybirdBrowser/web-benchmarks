@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<!-- remove 100 todo items last to first with removeChild, then force layout; 20 rounds (DeletingAllItems) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20,
+    setup: () => {
+    const list = buildList(0);
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < 2000; i++) fragment.appendChild(makeTodoItem(i, false));
+    list.appendChild(fragment);
+    forceLayout();
+    return list;
+},
+    run: (list, iters) => {
+    for (let round = 0; round < iters; round++) {
+        for (let i = 99; i >= 0; i--)
+            list.removeChild(list.lastElementChild);
+        forceLayout();
+    }
+    if (list.childElementCount !== 0) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

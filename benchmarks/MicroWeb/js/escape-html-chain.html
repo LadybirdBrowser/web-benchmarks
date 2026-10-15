@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<!-- HTML-escape with 6 chained .replace(/x/g, entity) calls, mostly on strings with nothing to escape (TodoMVC escapeForHTML, _.escape) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 20000,
+    setup: () => Array.from({ length: 64 }, (_, i) => i % 8 === 0 ? `Buy <milk> & \"eggs\" #${i}` : todoTitle(i)),
+    run: (inputs, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++)
+        acc += inputs[i & 63].replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;").replace(/`/g, "&#x60;").length;
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

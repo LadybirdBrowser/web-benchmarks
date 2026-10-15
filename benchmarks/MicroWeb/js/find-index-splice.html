@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<!-- findIndex by id + splice(index, 1) + splice back in, on a 100-todo array (Lit/Angular/Svelte delete) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 10000,
+    setup: () => Array.from({ length: 100 }, (_, i) => ({ id: "t" + i, completed: false })),
+    run: (todos, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const id = "t" + ((i * 7) % 100);
+        const index = todos.findIndex((t) => t.id === id);
+        const [removed] = todos.splice(index, 1);
+        todos.splice(index, 0, removed);
+        acc += index;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

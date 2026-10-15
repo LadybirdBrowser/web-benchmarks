@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- change the text of one item in a 100-item wrapping flex row of variable-width text items, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 50,
+    setup: () => {
+    sandbox().innerHTML = "<div style='display:flex;flex-wrap:wrap;gap:4px;width:700px;font:13px sans-serif'></div>";
+    const row = sandbox().firstChild;
+    for (let i = 0; i < 100; i++) { const d = document.createElement("div"); d.style.cssText = "flex:1 1 auto;padding:4px;border:1px solid #ddd"; d.textContent = "item " + i; row.appendChild(d); }
+    return Array.from(row.children);
+},
+    mutate: (items, k) => {
+    items[(k * 37) % 100].textContent = "item text " + "x".repeat(k % 20);
+},
+});
+</script>
+</body>
+</html>

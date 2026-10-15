@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<!-- window.scrollTo({top, behavior: 'instant'}) + scrollY read on a long page (NewsSite layout effect on navigation) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => {
+    sandbox().innerHTML = "<div style='height:20000px'></div>";
+    forceLayout();
+    return null;
+},
+    run: (ctx, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        window.scrollTo({ top: (i * 131) % 10000, behavior: "instant" });
+        acc += window.scrollY;
+    }
+    window.scrollTo(0, 0);
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

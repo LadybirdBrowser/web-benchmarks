@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<!-- Svelte set_data: write text-node .data of 100 labels and the footer count, then force layout once -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 20,
+    setup: () => {
+    const list = buildList(100);
+    return Array.from(list.querySelectorAll("label"), (label) => label.firstChild);
+},
+    mutate: (texts, k) => {
+    for (let i = 0; i < 100; i++)
+        texts[i].data = todoTitle(i + (k & 1) * 100);
+},
+});
+</script>
+</body>
+</html>

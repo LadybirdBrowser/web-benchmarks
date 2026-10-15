@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- 50000 .then callbacks attached to one pending promise, then resolve it (store subscriptions, nextTick queues) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1,
+    run: async (ctx, iters) => {
+    let resolve;
+    const p = new Promise((r) => { resolve = r; });
+    let acc = 0;
+    const all = [];
+    for (let i = 0; i < 50000; i++) all.push(p.then((v) => { acc += v; }));
+    resolve(1);
+    await Promise.all(all);
+    if (acc !== 50000) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

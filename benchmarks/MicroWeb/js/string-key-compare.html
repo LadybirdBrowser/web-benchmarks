@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<!-- === and < on equal-length strings differing late, plus comparison against freshly concatenated keys (keyed diffing, sort comparators) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 100000,
+    setup: () => {
+    const a = [], b = [];
+    for (let i = 0; i < 64; i++) { a.push("todo-item-key-" + (1000 + i)); b.push("todo-item-key-" + (1000 + ((i * 7) & 63))); }
+    return { a, b };
+},
+    run: ({ a, b }, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        const x = a[i & 63], y = b[i & 63];
+        if (x === y) acc++;
+        if (x < y) acc += 2;
+        if ("todo-item-key-" + (1000 + (i & 63)) === x) acc += 3;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

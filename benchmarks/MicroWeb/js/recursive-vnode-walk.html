@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<!-- recursive walk of a 4-ary, 5-level object tree (341 nodes) summing values (virtual DOM render/diff recursion) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => {
+    const make = (depth) => { const node = { tag: "div", children: [], value: depth }; if (depth > 0) for (let i = 0; i < 4; i++) node.children.push(make(depth - 1)); return node; };
+    return make(4);
+},
+    run: (tree, iters) => {
+    const walk = (node) => { let s = node.value; const c = node.children; for (let i = 0; i < c.length; i++) s += walk(c[i]); return s; };
+    let acc = 0;
+    for (let i = 0; i < iters; i++) acc += walk(tree);
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

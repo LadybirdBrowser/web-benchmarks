@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<!-- render 100 CodeMirror-style lines (div.cm-line with 8 token <span class>s each) into a pre-wrap contenteditable, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 5,
+    setup: () => {
+    injectStyleOnce("cm", ".cm-content { white-space: pre-wrap; font: 13px monospace; width: 600px; } .tk-kw { color: #708; } .tk-def { color: #00f; } .tk-str { color: #a11; } .tk-num { color: #164; }");
+    sandbox().innerHTML = "<div class='cm-content' contenteditable='true'></div>";
+    return sandbox().firstChild;
+},
+    mutate: (content, k) => {
+    content.textContent = "";
+    const kinds = ["tk-kw", "tk-def", "", "tk-str", "", "tk-num", "", "tk-kw"];
+    const words = ["function", "render", "(", "\"item\"", ",", String(k), ")", "return"];
+    for (let line = 0; line < 100; line++) {
+        const div = document.createElement("div");
+        div.className = "cm-line";
+        for (let t = 0; t < 8; t++) {
+            if (kinds[t]) { const span = document.createElement("span"); span.className = kinds[t]; span.textContent = words[t] + " "; div.appendChild(span); }
+            else div.appendChild(document.createTextNode(words[t] + " "));
+        }
+        content.appendChild(div);
+    }
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<!-- Angular-style change detection: compare 100 components' 4 bound values against their last values, update the DOM only where changed (one change per pass) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 500,
+    setup: () => {
+    const list = buildList(100);
+    const views = Array.from(list.children, (li, i) => ({
+        li, label: li.querySelector("label"), toggle: li.querySelector(".toggle"),
+        model: { title: "Something to do " + i + " lorem ipsum dolor sit amet", completed: false, editing: false, priority: i % 5 },
+        last: { title: "Something to do " + i + " lorem ipsum dolor sit amet", completed: false, editing: false, priority: i % 5 },
+    }));
+    return views;
+},
+    run: (views, iters) => {
+    let writes = 0;
+    for (let i = 0; i < iters; i++) {
+        views[i % 100].model.completed = !views[i % 100].model.completed;
+        for (const view of views) {
+            const { model, last } = view;
+            if (model.title !== last.title) { view.label.textContent = last.title = model.title; writes++; }
+            if (model.completed !== last.completed) { view.li.classList.toggle("completed", (last.completed = model.completed)); view.toggle.checked = model.completed; writes++; }
+            if (model.editing !== last.editing) { view.li.classList.toggle("editing", (last.editing = model.editing)); writes++; }
+            if (model.priority !== last.priority) { view.li.dataset.priority = last.priority = model.priority; writes++; }
+        }
+    }
+    if (writes !== iters) throw new Error("bad result " + writes);
+},
+});
+</script>
+</body>
+</html>

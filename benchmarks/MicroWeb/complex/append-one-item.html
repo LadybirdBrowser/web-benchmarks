@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<!-- append one todo item to the Complex-DOM page, then force layout (per-event rendering frameworks) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 30,
+    prepare: () => loadComplexDOM(),
+    setup: (iteration, list) => fillTodoList(list, 50),
+    mutate: (list, k) => {
+    list.appendChild(makeTodoItem(50 + k, false));
+},
+});
+</script>
+</body>
+</html>

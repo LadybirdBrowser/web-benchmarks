@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<!-- d3-dsv csvParse + autoType: split a 200-row CSV into lines and fields, build row objects keyed by header, convert numeric fields (observable-plot/chartjs #prepare) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 60,
+    setup: () => {
+    let csv = "iata,name,city,state,country,latitude,longitude\n";
+    for (let i = 0; i < 200; i++) csv += `A${i},Airport ${i},City ${i % 37},S${i % 50},USA,${(30 + i / 10).toFixed(4)},${(-80 - i / 10).toFixed(4)}\n`;
+    return csv;
+},
+    run: (csv, iters) => {
+    let acc = 0;
+    for (let k = 0; k < iters; k++) {
+        const lines = csv.split("\n");
+        const header = lines[0].split(",");
+        const rows = [];
+        for (let i = 1; i < lines.length; i++) {
+            if (!lines[i]) continue;
+            const fields = lines[i].split(",");
+            const row = {};
+            for (let c = 0; c < header.length; c++) { const v = fields[c]; const n = +v; row[header[c]] = v !== "" && !Number.isNaN(n) ? n : v; }
+            rows.push(row);
+        }
+        acc += rows.length + rows[5].latitude;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

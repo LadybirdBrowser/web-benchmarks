@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<!-- toggle a <body> class that descendant rules depend on (letter-spacing of every menu/tree label) in the Complex-DOM page, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 4,
+    prepare: async () => {
+    const list = await loadComplexDOM();
+    injectStyleOnce("complex-state", ".app-state .spectrum-TreeView-itemLabel, .app-state .spectrum-Menu-itemLabel, .app-state .todo-area label { letter-spacing: 0.5px; }");
+    return fillTodoList(list, 100);
+},
+    setup: (iteration, list) => list,
+    mutate: (list, k) => {
+    document.body.classList.toggle("app-state");
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<!-- for (const [i, v] of array.entries()) and for (const [k, v] of map) with destructuring (Lit repeat, Vue renderList) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 10000,
+    setup: () => {
+    const array = Array.from({ length: 32 }, (_, i) => i);
+    const map = new Map(array.map((i) => ["k" + i, i]));
+    return { array, map };
+},
+    run: ({ array, map }, iters) => {
+    let acc = 0;
+    for (let k = 0; k < iters; k++) {
+        for (const [i, v] of array.entries()) if (i === (k & 31)) acc += v;
+        for (const [key, v] of map) if (v === 3) acc += key.length;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

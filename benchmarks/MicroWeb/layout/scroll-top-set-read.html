@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<!-- scrollTop = y then read scrollTop + scrollHeight of a 400-row overflow:auto scroller (NewsSite scrollTo, TipTap scrollTop = 0) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2000,
+    setup: () => {
+    sandbox().innerHTML = "<div style='height:300px;overflow:auto;font:14px sans-serif'></div>";
+    const scroller = sandbox().firstChild;
+    for (let i = 0; i < 400; i++) { const d = document.createElement("div"); d.style.height = "24px"; d.textContent = "Row " + i; scroller.appendChild(d); }
+    forceLayout();
+    return scroller;
+},
+    run: (scroller, iters) => {
+    let acc = 0;
+    for (let i = 0; i < iters; i++) {
+        scroller.scrollTop = (i * 97) % 5000;
+        acc += scroller.scrollTop + scroller.scrollHeight;
+    }
+    if (!acc) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

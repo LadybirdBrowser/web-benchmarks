@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<!-- toggle a class on one of 300 cells then read getComputedStyle(cell).color (forced style recalc, no layout) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1500,
+    setup: () => {
+    injectStyleOnce("cells", ".cell { display: inline-block; width: 40px; color: rgb(10, 20, 30); } .cell.on { color: rgb(200, 0, 0); }");
+    sandbox().textContent = "";
+    const cells = [];
+    for (let i = 0; i < 300; i++) { const d = document.createElement("div"); d.className = "cell"; d.textContent = "c" + i; sandbox().appendChild(d); cells.push(d); }
+    forceLayout();
+    return cells;
+},
+    run: (cells, iters) => {
+    let red = 0;
+    for (let i = 0; i < iters; i++) {
+        const cell = cells[(i * 7) % 300];
+        cell.classList.toggle("on");
+        if (getComputedStyle(cell).color === "rgb(200, 0, 0)") red++;
+    }
+    if (!red) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>
