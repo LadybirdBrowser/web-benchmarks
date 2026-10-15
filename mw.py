@@ -6,7 +6,7 @@
     ./mw.py layout-thrash fill-style-set  # several tests in one go
 
 Each test runs in a fresh browser per engine (no session-aging tax). Chromium runs
-jitless by default for an engine-vs-engine comparison; pass --jit to enable the JIT.
+with its JIT, as shipped; pass --jitless to disable it.
 """
 
 import argparse
@@ -114,7 +114,7 @@ def main():
     parser.add_argument("tests", nargs="+", help="Test path or unique substring, e.g. dom/create-element")
     parser.add_argument("--iterations", type=int, default=5)
     parser.add_argument("--timeout", type=float, default=120)
-    parser.add_argument("--jit", action="store_true", help="Run Chromium with its JIT enabled")
+    parser.add_argument("--jitless", dest="jit", action="store_false", help="Run Chromium with its JIT disabled")
     parser.add_argument("--ladybird-executable",
                         default=os.path.join(os.environ.get("LADYBIRD_SOURCE_DIR", os.path.expanduser("~/src/ladybird")),
                                              "Build", "release", "bin", "Ladybird"))

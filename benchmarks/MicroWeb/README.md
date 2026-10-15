@@ -16,8 +16,8 @@ different tests in parallel without stepping on each other.
 ./run.py --executable "$LADYBIRD/Build/release/bin/Ladybird" \
     --benchmarks MicroWeb --split-suites --iterations 5 -o lb.json
 
-# Chromium, JIT disabled (the interesting engine-vs-engine comparison)
-./run.py --executable /snap/bin/chromium --browser chromium --jitless \
+# Chromium as shipped, JIT enabled (add --jitless for an interpreter comparison)
+./run.py --executable /snap/bin/chromium --browser chromium \
     --benchmarks MicroWeb --split-suites --iterations 5 -o cr.json
 
 # Ranked multiplier table, worst first
@@ -51,7 +51,7 @@ fix:
 
 ```bash
 $ ./mw.py fill-style-set
-canvas/fill-style-set.html  (iterations: 5, chromium jitless)
+canvas/fill-style-set.html  (iterations: 5, chromium jit)
   ladybird  median    70.80 ms   [72.10, 70.70, 71.00, 70.80, 70.30]
   chromium  median     1.20 ms   [1.20, 1.20, 1.30, 1.10, 1.10]
   ratio     Ladybird is 59.0x slower

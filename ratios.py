@@ -5,7 +5,7 @@ Typical use: rank how much slower Ladybird is than Chromium on every MicroWeb te
 worst first, so the worst offender is always the next thing to work on.
 
     ./run.py --executable .../Ladybird --benchmarks MicroWeb -o lb.json
-    ./run.py --executable /snap/bin/chromium --browser chromium --jitless \\
+    ./run.py --executable /snap/bin/chromium --browser chromium \\
         --benchmarks MicroWeb -o cr.json
     ./ratios.py --subject lb.json --reference cr.json
 
