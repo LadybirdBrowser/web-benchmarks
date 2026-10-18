@@ -5720,6 +5720,153 @@ TESTS["js/json-store-update.html"] = micro(
     }""")
 
 
+# ======================================================================================
+# StyleBench-derived: reduced from the StyleBench steps and suite setup where Chromium was
+# faster. Each isolates one workload.
+# ======================================================================================
+
+TESTS["style/remove-wide-hidden-container.html"] = micro(
+    "remove a display:none container of 4000 child divs, then force style (cost grows with the square of the child count)", 1,
+    setup="""
+    () => {
+        sandbox().style.display = "none";
+        sandbox().textContent = "";
+        const container = document.createElement("div");
+        for (let i = 0; i < 4000; i++)
+            container.appendChild(document.createElement("div"));
+        sandbox().appendChild(container);
+        forceLayout();
+        return container;
+    }""",
+    run="""
+    (container) => {
+        container.remove();
+        forceLayout();
+        if (sandbox().firstChild) throw new Error("bad result");
+    }""")
+
+TESTS["style/insert-under-display-none.html"] = micro(
+    "insert a container of 5000 child divs into a display:none parent, then force style + layout (nothing renders)", 1,
+    setup="""
+    () => {
+        sandbox().style.display = "none";
+        sandbox().textContent = "";
+        forceLayout();
+        const container = document.createElement("div");
+        for (let i = 0; i < 5000; i++)
+            container.appendChild(document.createElement("div"));
+        return container;
+    }""",
+    run="""
+    (container) => {
+        sandbox().appendChild(container);
+        forceLayout();
+        if (sandbox().firstChild !== container) throw new Error("bad result");
+    }""")
+
+TESTS["style/initial-style-5000-elements.html"] = micro(
+    "insert a StyleBench-shaped 5000-element tree whose elements are all display:contents, then force style (style only: no boxes, no author rules)", 1,
+    setup="""
+    () => {
+        injectStyleOnce("contents", "#sandbox * { display: contents; }");
+        sandbox().textContent = "";
+        forceLayout();
+        return makeInlineBlockTree(5000);
+    }""",
+    run="""
+    (tree) => {
+        sandbox().appendChild(tree);
+        forceLayout();
+        if (sandbox().firstChild !== tree) throw new Error("bad result");
+    }""")
+
+TESTS["style/insert-5000-rule-sheet-then-layout.html"] = micro(
+    "insert a 5000-rule sheet of StyleBench-style descendant/child selectors over a 100-item list, force layout, remove it, force layout", 2,
+    setup="() => { buildList(100); return makeRuleSheetText(5000); }",
+    run="""
+    (css, iters) => {
+        for (let i = 0; i < iters; i++) {
+            const style = document.createElement("style");
+            style.textContent = css;
+            document.head.appendChild(style);
+            forceLayout();
+            style.remove();
+            forceLayout();
+        }
+    }""")
+
+TESTS["render/initial-layout-5000-blocks.html"] = micro(
+    "insert a container of 5000 empty fixed-height block divs and force the first style + layout", 1,
+    setup="""
+    () => {
+        injectStyleOnce("blocks", "#sandbox div div { height: 10px; }");
+        sandbox().textContent = "";
+        forceLayout();
+        const container = document.createElement("div");
+        for (let i = 0; i < 5000; i++)
+            container.appendChild(document.createElement("div"));
+        return container;
+    }""",
+    run="""
+    (container) => {
+        sandbox().appendChild(container);
+        if (forceLayout() < 50000) throw new Error("bad result");
+    }""")
+
+TESTS["render/insert-scattered-leaves.html"] = pipeline(
+    "insert 100 new leaves under 100 random parents of a StyleBench-shaped 5000-element inline-block tree with a 5000-rule sheet, then force layout", 1,
+    setup="""
+    () => {
+        injectInlineBlockStyle();
+        injectStyleOnce("rules", makeRuleSheetText(5000));
+        sandbox().textContent = "";
+        sandbox().appendChild(makeInlineBlockTree(5000));
+        forceLayout();
+        return { parents: [...sandbox().querySelectorAll("*")].filter((e) => e.firstChild), random: seededRandom(4) };
+    }""",
+    mutate="""
+    ({ parents, random }) => {
+        for (let i = 0; i < 100; i++) {
+            const parent = parents[random(parents.length)];
+            const element = document.createElement("elem" + random(10));
+            element.className = "class" + random(200);
+            parent.insertBefore(element, parent.childNodes[random(parent.childNodes.length + 1)] || null);
+        }
+    }""")
+
+TESTS["render/remove-scattered-leaves.html"] = pipeline(
+    "remove 100 random leaves of a StyleBench-shaped 5000-element inline-block tree with a 5000-rule sheet, then force layout", 1,
+    setup="""
+    () => {
+        injectInlineBlockStyle();
+        injectStyleOnce("rules", makeRuleSheetText(5000));
+        sandbox().textContent = "";
+        sandbox().appendChild(makeInlineBlockTree(5000));
+        forceLayout();
+        return { leaves: [...sandbox().querySelectorAll("*")].filter((e) => !e.firstChild), random: seededRandom(5) };
+    }""",
+    mutate="""
+    ({ leaves, random }) => {
+        for (let i = 0; i < 100; i++) {
+            const index = random(leaves.length);
+            leaves[index].remove();
+            leaves[index] = leaves[leaves.length - 1];
+            leaves.pop();
+        }
+    }""")
+
+TESTS["js/lehmer-random-modulo.html"] = micro(
+    "Lehmer RNG step seed = seed * 16807 % 2147483647, whose product leaves the int32 range (StyleBench's random source)", 1000000,
+    run="""
+    (_, iters) => {
+        let seed = 1, acc = 0;
+        for (let i = 0; i < iters; i++) {
+            seed = seed * 16807 % 2147483647;
+            acc += seed % 1048576;
+        }
+        if (!acc) throw new Error("bad result");
+    }""")
+
 def main():
     index_entries = []
     for path in sorted(TESTS):

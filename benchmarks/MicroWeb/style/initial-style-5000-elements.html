@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<!-- insert a StyleBench-shaped 5000-element tree whose elements are all display:contents, then force style (style only: no boxes, no author rules) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1,
+    setup: () => {
+    injectStyleOnce("contents", "#sandbox * { display: contents; }");
+    sandbox().textContent = "";
+    forceLayout();
+    return makeInlineBlockTree(5000);
+},
+    run: (tree) => {
+    sandbox().appendChild(tree);
+    forceLayout();
+    if (sandbox().firstChild !== tree) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

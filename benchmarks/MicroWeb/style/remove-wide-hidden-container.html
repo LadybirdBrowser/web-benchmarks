@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<!-- remove a display:none container of 4000 child divs, then force style (cost grows with the square of the child count) -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1,
+    setup: () => {
+    sandbox().style.display = "none";
+    sandbox().textContent = "";
+    const container = document.createElement("div");
+    for (let i = 0; i < 4000; i++)
+        container.appendChild(document.createElement("div"));
+    sandbox().appendChild(container);
+    forceLayout();
+    return container;
+},
+    run: (container) => {
+    container.remove();
+    forceLayout();
+    if (sandbox().firstChild) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

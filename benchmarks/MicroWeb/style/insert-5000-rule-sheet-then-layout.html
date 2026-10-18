@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<!-- insert a 5000-rule sheet of StyleBench-style descendant/child selectors over a 100-item list, force layout, remove it, force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 2,
+    setup: () => { buildList(100); return makeRuleSheetText(5000); },
+    run: (css, iters) => {
+    for (let i = 0; i < iters; i++) {
+        const style = document.createElement("style");
+        style.textContent = css;
+        document.head.appendChild(style);
+        forceLayout();
+        style.remove();
+        forceLayout();
+    }
+},
+});
+</script>
+</body>
+</html>

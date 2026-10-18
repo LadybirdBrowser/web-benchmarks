@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<!-- insert a container of 5000 empty fixed-height block divs and force the first style + layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+microbench({
+    iters: 1,
+    setup: () => {
+    injectStyleOnce("blocks", "#sandbox div div { height: 10px; }");
+    sandbox().textContent = "";
+    forceLayout();
+    const container = document.createElement("div");
+    for (let i = 0; i < 5000; i++)
+        container.appendChild(document.createElement("div"));
+    return container;
+},
+    run: (container) => {
+    sandbox().appendChild(container);
+    if (forceLayout() < 50000) throw new Error("bad result");
+},
+});
+</script>
+</body>
+</html>

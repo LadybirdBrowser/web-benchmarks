@@ -334,3 +334,68 @@ function fillTodoList(list, n, completedEvery) {
     list.appendChild(fragment);
     return list;
 }
+
+// --- StyleBench-shaped fixtures -------------------------------------------------------
+// Seeded, so every browser builds the identical tree and stylesheet.
+
+function seededRandom(seed) {
+    let state = seed;
+    return (under) => {
+        state = (state * 16807) % 2147483647;
+        return Math.floor(((state % 1048576) / 1048576) * under);
+    };
+}
+
+// StyleBench's base style: every element under the sandbox is a small inline-block.
+function injectInlineBlockStyle() {
+    injectStyleOnce("inline-block-tree", `
+        #sandbox { font-size: 10px; line-height: 10px; }
+        #sandbox * { display: inline-block; height: 10px; min-width: 10px; }
+    `);
+}
+
+// A detached tree of `count` elements named elem0..elem9, shaped like StyleBench's: up
+// to six levels deep and wider further down, mostly leaves. About half the elements
+// carry one or two of classCount classes.
+function makeInlineBlockTree(count, { seed = 2, classCount = 200 } = {}) {
+    const random = seededRandom(seed);
+    const root = document.createElement("div");
+    let remaining = count;
+    function fill(parent, depth) {
+        let width = 0;
+        if (depth === 0)
+            width = remaining;
+        else if (random(6) < 6 - depth)
+            width = random(Math.floor(50 * depth / 6));
+        for (let i = 0; i < width && remaining > 0; i++) {
+            const element = document.createElement("elem" + random(10));
+            if (random(2))
+                element.className = "class" + random(classCount) + (random(3) ? "" : " class" + random(classCount));
+            parent.appendChild(element);
+            remaining--;
+            fill(element, depth + 1);
+        }
+    }
+    fill(root, 0);
+    return root;
+}
+
+// `count` rules of random descendant/child selectors over the classes and element names
+// of makeInlineBlockTree, each setting a background color.
+function makeRuleSheetText(count, { seed = 1, classCount = 200 } = {}) {
+    const random = seededRandom(seed);
+    let css = "";
+    for (let i = 0; i < count; i++) {
+        const length = random(6) + 1;
+        const parts = [];
+        for (let j = 0; j < length; j++) {
+            const compound = (random(2) ? "elem" + random(10) : "") + ".class" + random(Math.max(1, Math.round(classCount * (j + 1) / length)));
+            parts.push(compound);
+            if (j < length - 1)
+                parts.push(random(2) ? ">" : "");
+        }
+        const selector = parts.filter(Boolean).join(" ");
+        css += selector + ` { background-color: rgb(${random(256)}, ${random(256)}, ${random(256)}); }\n`;
+    }
+    return css;
+}

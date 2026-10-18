@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<!-- insert 100 new leaves under 100 random parents of a StyleBench-shaped 5000-element inline-block tree with a 5000-rule sheet, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 1,
+    setup: () => {
+    injectInlineBlockStyle();
+    injectStyleOnce("rules", makeRuleSheetText(5000));
+    sandbox().textContent = "";
+    sandbox().appendChild(makeInlineBlockTree(5000));
+    forceLayout();
+    return { parents: [...sandbox().querySelectorAll("*")].filter((e) => e.firstChild), random: seededRandom(4) };
+},
+    mutate: ({ parents, random }) => {
+    for (let i = 0; i < 100; i++) {
+        const parent = parents[random(parents.length)];
+        const element = document.createElement("elem" + random(10));
+        element.className = "class" + random(200);
+        parent.insertBefore(element, parent.childNodes[random(parent.childNodes.length + 1)] || null);
+    }
+},
+});
+</script>
+</body>
+</html>
