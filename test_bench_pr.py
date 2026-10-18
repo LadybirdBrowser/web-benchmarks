@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Tests for the parts of bench_pr.py that need no build and no browser: its argument checks, the cache seed a fresh
 worktree gets, and which executables a relink covers."""
+import json
 import os
 import subprocess
 import sys
@@ -35,6 +36,36 @@ class CacheSeed(unittest.TestCase):
             bench_pr.seed_caches(source_repo, tree)
             with open(os.path.join(tree, "Build/caches/ccache/entry")) as f:
                 self.assertEqual(f.read(), "object")
+
+
+class VcpkgCheckout(unittest.TestCase):
+    @staticmethod
+    def make(tmp, baseline=None):
+        """A tree whose vcpkg.json names the baseline, and a vcpkg checkout of one commit: the baseline, by default."""
+        checkout = os.path.join(tmp, "Build/vcpkg")
+        subprocess.run(["git", "init", "-q", checkout], check=True)
+        subprocess.run(["git", "-C", checkout, "-c", "user.name=bench", "-c", "user.email=bench@localhost", "commit",
+                        "-q", "--allow-empty", "--no-verify", "--no-gpg-sign", "-m", "ports"], check=True)
+        with open(os.path.join(tmp, "vcpkg.json"), "w") as f:
+            json.dump({"builtin-baseline": baseline or bench_pr.git(["rev-parse", "HEAD"], checkout)}, f)
+        return checkout
+
+    def test_a_checkout_at_the_tree_baseline_needs_no_steps(self):
+        with tempfile.TemporaryDirectory() as tree:
+            checkout = self.make(tree)
+            self.assertEqual(bench_pr.vcpkg_steps(checkout, tree), [])
+
+    def test_a_checkout_at_another_baseline_is_checked_out_at_the_tree_baseline_and_bootstrapped(self):
+        # An arm's checkout stays at whatever baseline its tree named when the arm was last built, and a later commit
+        # of the tree can name another.
+        baseline = "20ceb8adbf0504d4b0d5e4058a32f9d4fc896391"
+        with tempfile.TemporaryDirectory() as tree:
+            checkout = self.make(tree, baseline)
+            steps = bench_pr.vcpkg_steps(checkout, tree)
+            self.assertEqual(steps[:2], [["git", "-C", checkout, "fetch", "origin"],
+                                         ["git", "-C", checkout, "checkout", "--detach", baseline]])
+            self.assertEqual(steps[2][1:], ["-disableMetrics"])
+            self.assertEqual(os.path.dirname(steps[2][0]), checkout)
 
 
 class RunLock(unittest.TestCase):

@@ -247,23 +247,38 @@ def ensure_worktree(slot, sha, source_repo, worktree_root):
     env["VCPKG_BINARY_SOURCES"] = (
         f"files,{vcpkg_archives()},readwrite;"
         f"files,{os.path.join(source_repo, 'Build/caches/vcpkg-binary-cache')},read")
-    # What Meta/ladybird.py exports before it configures; the presets find the vcpkg toolchain through VCPKG_ROOT.
+    # The presets find the vcpkg toolchain through VCPKG_ROOT: the arm's own checkout. Meta/ladybird.py builds with the
+    # main worktree's instead — which the two arms and the source tree's own builds would then share, each checking it
+    # out at its own baseline. So nothing here goes through Meta/ladybird.py.
     env["VCPKG_ROOT"] = os.path.join(tree, "Build/vcpkg")
     env["PATH"] = env.get("PATH", "") + os.pathsep + env["VCPKG_ROOT"]
     with open(log, "w") as lf:
         # A Ladybird tree that tests ENABLE_LTO_FOR_RELEASE before defining the option skips LTO on a first configure,
         # while a re-configured tree has it. Define it on the command line, ahead of any CMakeLists, and configure every
         # time: both arms then get the same compile line however old the commit is, and whatever the tree did before.
-        steps = ([sys.executable, "Meta/ladybird.py", "vcpkg"],
+        steps = (*vcpkg_steps(env["VCPKG_ROOT"], tree),
                  ["cmake", "--preset", "Distribution", "-S", tree, "-B",
                   os.path.join(tree, "Build/distribution"), "-DENABLE_LTO_FOR_RELEASE=ON"],
-                 [sys.executable, "Meta/ladybird.py", "build", "ladybird"])
+                 ["cmake", "--build", os.path.join(tree, "Build/distribution"), "--target", "Ladybird"])
         for step in steps:
             rc = subprocess.run(step, cwd=tree, env=env, stdout=lf, stderr=subprocess.STDOUT).returncode
             if rc != 0:
                 sys.exit(f"Build failed for {slot} at {sha[:11]}; see {log}")
     open(stamp, "w").write(f"{sha} {BUILD_STAMP}")
     return tree
+
+
+def vcpkg_steps(checkout, tree):
+    """The commands that check a vcpkg checkout out at the baseline the tree's vcpkg.json names, and bootstrap it there,
+    as Meta/ladybird.py does for its own: none, when it's at that baseline already."""
+    with open(os.path.join(tree, "vcpkg.json")) as f:
+        baseline = json.load(f)["builtin-baseline"]
+    if git(["-C", checkout, "rev-parse", "HEAD"], None, check=False) == baseline:
+        return []
+    bootstrap = "bootstrap-vcpkg.bat" if platform.system() == "Windows" else "bootstrap-vcpkg.sh"
+    return [["git", "-C", checkout, "fetch", "origin"],
+            ["git", "-C", checkout, "checkout", "--detach", baseline],
+            [os.path.join(checkout, bootstrap), "-disableMetrics"]]
 
 
 def compile_flags_in(tree):
