@@ -293,6 +293,12 @@ def main():
         elif not run_benchmark(server_root, runner_url, params, ladybird_arguments, timeout, verbose=args.verbose, browser=args.browser):
             failed_benchmarks.append(benchmark)
 
+    # A benchmark that failed partway through leaves behind results for only some of its tests or iterations, which would
+    # skew its totals; leave it out entirely so the benchmarks that did complete can still be reported.
+    for benchmark in failed_benchmarks:
+        test_results.pop(benchmark, None)
+        benchmark_totals.pop(benchmark, None)
+
     test_times_data = []
     for benchmark, suites in test_results.items():
         for suite, tests in suites.items():
@@ -375,8 +381,14 @@ def main():
         json.dump(formatted_results, f, indent=4)
 
     if failed_benchmarks:
-        print(f"\nError: The following benchmarks failed: {', '.join(failed_benchmarks)}", file=sys.stderr)
-        sys.exit(1)
+        message = f"The following benchmarks failed: {', '.join(failed_benchmarks)}"
+        print(f"\nError: {message}", file=sys.stderr)
+        # One failing benchmark must not keep the others' results from being reported, so this only exits with an error
+        # if nothing completed. On GitHub Actions, an annotation keeps the failure visible on the run's summary page.
+        if os.environ.get("GITHUB_ACTIONS") == "true":
+            print(f"::error title=Benchmarks failed::{message}")
+        if not test_results:
+            sys.exit(1)
 
 if __name__ == "__main__":
     main()
