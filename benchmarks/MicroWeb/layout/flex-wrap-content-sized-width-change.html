@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<!-- alternate the width of a wrapping flex row of 500 content-sized items, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => {
+    sandbox().textContent = "";
+    injectStyleOnce("flex-content-sized-items", `
+        .flex-content-sized { display: flex; flex-wrap: wrap; gap: 4px; width: 900px; font-size: 14px; }
+        .flex-content-sized > div { padding: 2px; border: 1px solid #ddd; }
+    `);
+    const words = "alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu".split(" ");
+    const container = document.createElement("div");
+    container.className = "flex-content-sized";
+    for (let i = 0; i < 500; i++) {
+        const item = document.createElement("div");
+        item.textContent = words[i % words.length] + " " + words[(i + 3) % words.length];
+        container.appendChild(item);
+    }
+    sandbox().appendChild(container);
+    return container;
+},
+    mutate: (container, k) => {
+    container.style.width = k & 1 ? "899px" : "900px";
+},
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<!-- alternate the width of a wrapping flex row of 200 auto-height text items, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => {
+    sandbox().textContent = "";
+    injectStyleOnce("flex-text-items", `
+        .flex-text-row { display: flex; flex-wrap: wrap; width: 600px; }
+        .flex-text-item { flex: 1 1 140px; margin: 2px; font-size: 13px; }
+    `);
+    const container = document.createElement("div");
+    container.className = "flex-text-row";
+    for (let i = 0; i < 200; i++) {
+        const item = document.createElement("div");
+        item.className = "flex-text-item";
+        item.textContent = "Item " + i + " has a short description that wraps onto a few lines.";
+        container.appendChild(item);
+    }
+    sandbox().appendChild(container);
+    return container;
+},
+    mutate: (container, k) => {
+    container.style.width = k & 1 ? "640px" : "600px";
+},
+});
+</script>
+</body>
+</html>

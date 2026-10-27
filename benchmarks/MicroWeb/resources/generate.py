@@ -2176,6 +2176,207 @@ TESTS["layout/relative-offset.html"] = pipeline(
     }""")
 
 
+TESTS["layout/flex-text-items-width-change.html"] = pipeline(
+    "alternate the width of a wrapping flex row of 200 auto-height text items, then force layout", 10,
+    setup="""
+    () => {
+        sandbox().textContent = "";
+        injectStyleOnce("flex-text-items", `
+            .flex-text-row { display: flex; flex-wrap: wrap; width: 600px; }
+            .flex-text-item { flex: 1 1 140px; margin: 2px; font-size: 13px; }
+        `);
+        const container = document.createElement("div");
+        container.className = "flex-text-row";
+        for (let i = 0; i < 200; i++) {
+            const item = document.createElement("div");
+            item.className = "flex-text-item";
+            item.textContent = "Item " + i + " has a short description that wraps onto a few lines.";
+            container.appendChild(item);
+        }
+        sandbox().appendChild(container);
+        return container;
+    }""",
+    mutate="""
+    (container, k) => {
+        container.style.width = k & 1 ? "640px" : "600px";
+    }""")
+
+TESTS["layout/flex-wrap-content-sized-width-change.html"] = pipeline(
+    "alternate the width of a wrapping flex row of 500 content-sized items, then force layout", 10,
+    setup="""
+    () => {
+        sandbox().textContent = "";
+        injectStyleOnce("flex-content-sized-items", `
+            .flex-content-sized { display: flex; flex-wrap: wrap; gap: 4px; width: 900px; font-size: 14px; }
+            .flex-content-sized > div { padding: 2px; border: 1px solid #ddd; }
+        `);
+        const words = "alpha beta gamma delta epsilon zeta eta theta iota kappa lambda mu".split(" ");
+        const container = document.createElement("div");
+        container.className = "flex-content-sized";
+        for (let i = 0; i < 500; i++) {
+            const item = document.createElement("div");
+            item.textContent = words[i % words.length] + " " + words[(i + 3) % words.length];
+            container.appendChild(item);
+        }
+        sandbox().appendChild(container);
+        return container;
+    }""",
+    mutate="""
+    (container, k) => {
+        container.style.width = k & 1 ? "899px" : "900px";
+    }""")
+
+TESTS["layout/flex-line-item-grows.html"] = pipeline(
+    "grow and shrink one item's text in a wrapping flex row, so its line and the stretched items in it change height, then force layout", 40,
+    setup="""
+    () => {
+        sandbox().textContent = "";
+        injectStyleOnce("flex-text-items", `
+            .flex-text-row { display: flex; flex-wrap: wrap; width: 600px; }
+            .flex-text-item { flex: 1 1 140px; margin: 2px; font-size: 13px; }
+        `);
+        const container = document.createElement("div");
+        container.className = "flex-text-row";
+        for (let i = 0; i < 200; i++) {
+            const item = document.createElement("div");
+            item.className = "flex-text-item";
+            item.innerHTML = "<p>Item " + i + " has a short description that wraps onto a few lines.</p><p>A second paragraph.</p><span></span>";
+            container.appendChild(item);
+        }
+        sandbox().appendChild(container);
+        return container;
+    }""",
+    mutate="""
+    (container, k) => {
+        const item = container.children[((k >> 1) * 37) % 200];
+        item.lastChild.textContent = k & 1 ? "" : "Extra text that adds another line or two to this item.";
+    }""")
+
+TESTS["layout/column-flex-item-text-edit.html"] = pipeline(
+    "change one item's text in a column flex container of 200 auto-height text items, then force layout", 40,
+    setup="""
+    () => {
+        sandbox().textContent = "";
+        injectStyleOnce("column-flex-text-items", `
+            .column-flex { display: flex; flex-direction: column; width: 400px; }
+            .column-flex-item { margin: 2px; font-size: 13px; }
+        `);
+        const container = document.createElement("div");
+        container.className = "column-flex";
+        for (let i = 0; i < 200; i++) {
+            const item = document.createElement("div");
+            item.className = "column-flex-item";
+            item.innerHTML = "<p>Item " + i + " has a short description that wraps onto a few lines.</p><span></span>";
+            container.appendChild(item);
+        }
+        sandbox().appendChild(container);
+        return container;
+    }""",
+    mutate="""
+    (container, k) => {
+        const item = container.children[((k >> 1) * 37) % 200];
+        item.lastChild.textContent = k & 1 ? "" : "Extra text that adds another line to this item.";
+    }""")
+
+TESTS["layout/grid-text-items-width-change.html"] = pipeline(
+    "alternate the width of a 4-column grid of 200 auto-height text items, then force layout", 10,
+    setup="""
+    () => {
+        sandbox().textContent = "";
+        injectStyleOnce("grid-text-items", `
+            .grid-text { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; width: 600px; }
+            .grid-text-item { font-size: 13px; }
+        `);
+        const container = document.createElement("div");
+        container.className = "grid-text";
+        for (let i = 0; i < 200; i++) {
+            const item = document.createElement("div");
+            item.className = "grid-text-item";
+            item.textContent = "Item " + i + " has a short description that wraps onto a few lines.";
+            container.appendChild(item);
+        }
+        sandbox().appendChild(container);
+        return container;
+    }""",
+    mutate="""
+    (container, k) => {
+        container.style.width = k & 1 ? "640px" : "600px";
+    }""")
+
+TESTS["layout/grid-row-item-grows.html"] = pipeline(
+    "grow and shrink one item's text in a 4-column grid, so its row and the stretched items in it change height, then force layout", 40,
+    setup="""
+    () => {
+        sandbox().textContent = "";
+        injectStyleOnce("grid-text-items", `
+            .grid-text { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; width: 600px; }
+            .grid-text-item { font-size: 13px; }
+        `);
+        const container = document.createElement("div");
+        container.className = "grid-text";
+        for (let i = 0; i < 200; i++) {
+            const item = document.createElement("div");
+            item.className = "grid-text-item";
+            item.innerHTML = "<p>Item " + i + " has a short description that wraps onto a few lines.</p><p>A second paragraph.</p><span></span>";
+            container.appendChild(item);
+        }
+        sandbox().appendChild(container);
+        return container;
+    }""",
+    mutate="""
+    (container, k) => {
+        const item = container.children[((k >> 1) * 37) % 200];
+        item.lastChild.textContent = k & 1 ? "" : "Extra text that adds another line or two to this item.";
+    }""")
+
+TESTS["layout/shrink-to-fit-text-edit.html"] = pipeline(
+    "change one paragraph deep inside a shrink-to-fit inline-block of 100 nested sections, then force layout", 20,
+    setup="""
+    () => {
+        sandbox().textContent = "";
+        injectStyleOnce("shrink-to-fit-sections", `
+            .shrink-to-fit { display: inline-block; max-width: 700px; font-size: 13px; }
+            .shrink-to-fit .section { margin: 4px; padding: 2px; border: 1px solid #ccc; }
+            .shrink-to-fit .section-body { padding-left: 8px; }
+        `);
+        const container = document.createElement("div");
+        container.className = "shrink-to-fit";
+        for (let i = 0; i < 100; i++) {
+            const section = document.createElement("div");
+            section.className = "section";
+            section.innerHTML = "<div>Section " + i + "</div><div class='section-body'><div><p>Some text in this section.</p><p>More text below it.</p></div></div>";
+            container.appendChild(section);
+        }
+        sandbox().appendChild(container);
+        return container;
+    }""",
+    mutate="""
+    (container, k) => {
+        const paragraph = container.children[((k >> 1) * 37) % 100].querySelector("p");
+        paragraph.textContent = k & 1 ? "Some text in this section." : "Some longer text in this section, which widens it.";
+    }""")
+
+TESTS["layout/list-width-change.html"] = pipeline(
+    "alternate the width of a 500-item ordered list, then force layout", 10,
+    setup="""
+    () => {
+        sandbox().textContent = "";
+        const list = document.createElement("ol");
+        list.style.width = "600px";
+        for (let i = 0; i < 500; i++) {
+            const item = document.createElement("li");
+            item.textContent = "List item " + i;
+            list.appendChild(item);
+        }
+        sandbox().appendChild(list);
+        return list;
+    }""",
+    mutate="""
+    (list, k) => {
+        list.style.width = k & 1 ? "640px" : "600px";
+    }""")
+
+
 # ======================================================================================
 # text/ — text shaping, fonts, and text-driven layout.
 # ======================================================================================

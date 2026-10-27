@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<!-- alternate the width of a 4-column grid of 200 auto-height text items, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => {
+    sandbox().textContent = "";
+    injectStyleOnce("grid-text-items", `
+        .grid-text { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; width: 600px; }
+        .grid-text-item { font-size: 13px; }
+    `);
+    const container = document.createElement("div");
+    container.className = "grid-text";
+    for (let i = 0; i < 200; i++) {
+        const item = document.createElement("div");
+        item.className = "grid-text-item";
+        item.textContent = "Item " + i + " has a short description that wraps onto a few lines.";
+        container.appendChild(item);
+    }
+    sandbox().appendChild(container);
+    return container;
+},
+    mutate: (container, k) => {
+    container.style.width = k & 1 ? "640px" : "600px";
+},
+});
+</script>
+</body>
+</html>
