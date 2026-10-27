@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<!-- change one paragraph deep inside a shrink-to-fit inline-block of 100 nested sections, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 20,
+    setup: () => {
+    sandbox().textContent = "";
+    injectStyleOnce("shrink-to-fit-sections", `
+        .shrink-to-fit { display: inline-block; max-width: 700px; font-size: 13px; }
+        .shrink-to-fit .section { margin: 4px; padding: 2px; border: 1px solid #ccc; }
+        .shrink-to-fit .section-body { padding-left: 8px; }
+    `);
+    const container = document.createElement("div");
+    container.className = "shrink-to-fit";
+    for (let i = 0; i < 100; i++) {
+        const section = document.createElement("div");
+        section.className = "section";
+        section.innerHTML = "<div>Section " + i + "</div><div class='section-body'><div><p>Some text in this section.</p><p>More text below it.</p></div></div>";
+        container.appendChild(section);
+    }
+    sandbox().appendChild(container);
+    return container;
+},
+    mutate: (container, k) => {
+    const paragraph = container.children[((k >> 1) * 37) % 100].querySelector("p");
+    paragraph.textContent = k & 1 ? "Some text in this section." : "Some longer text in this section, which widens it.";
+},
+});
+</script>
+</body>
+</html>

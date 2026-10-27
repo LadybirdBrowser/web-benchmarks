@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<!-- alternate the width of a 500-item ordered list, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 10,
+    setup: () => {
+    sandbox().textContent = "";
+    const list = document.createElement("ol");
+    list.style.width = "600px";
+    for (let i = 0; i < 500; i++) {
+        const item = document.createElement("li");
+        item.textContent = "List item " + i;
+        list.appendChild(item);
+    }
+    sandbox().appendChild(list);
+    return list;
+},
+    mutate: (list, k) => {
+    list.style.width = k & 1 ? "640px" : "600px";
+},
+});
+</script>
+</body>
+</html>

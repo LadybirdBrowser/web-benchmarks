@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<!-- grow and shrink one item's text in a wrapping flex row, so its line and the stretched items in it change height, then force layout -->
+<body>
+<div id="sandbox"></div>
+<script src="../resources/micro.js"></script>
+<script>
+pipelineBench({
+    cycles: 40,
+    setup: () => {
+    sandbox().textContent = "";
+    injectStyleOnce("flex-text-items", `
+        .flex-text-row { display: flex; flex-wrap: wrap; width: 600px; }
+        .flex-text-item { flex: 1 1 140px; margin: 2px; font-size: 13px; }
+    `);
+    const container = document.createElement("div");
+    container.className = "flex-text-row";
+    for (let i = 0; i < 200; i++) {
+        const item = document.createElement("div");
+        item.className = "flex-text-item";
+        item.innerHTML = "<p>Item " + i + " has a short description that wraps onto a few lines.</p><p>A second paragraph.</p><span></span>";
+        container.appendChild(item);
+    }
+    sandbox().appendChild(container);
+    return container;
+},
+    mutate: (container, k) => {
+    const item = container.children[((k >> 1) * 37) % 200];
+    item.lastChild.textContent = k & 1 ? "" : "Extra text that adds another line or two to this item.";
+},
+});
+</script>
+</body>
+</html>
