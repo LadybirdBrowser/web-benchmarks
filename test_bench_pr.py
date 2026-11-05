@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Tests for the parts of bench_pr.py that need no build and no browser: its argument checks, the cache seed a fresh
 worktree gets, and which executables a relink covers."""
+import contextlib
+import io
 import json
 import os
 import subprocess
@@ -8,6 +10,7 @@ import sys
 import tempfile
 import unittest
 
+import bench_plan
 import bench_pr
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -23,6 +26,55 @@ class Arguments(unittest.TestCase):
         self.assertEqual(proc.returncode, 2, proc.stderr)
         self.assertIn("--rounds", proc.stderr)
 
+
+
+class FailingSuites(unittest.TestCase):
+    """run_pair over a stand-in run_suite that fails for the arms given: per attempt, the set of arms that fail."""
+
+    def run_pair(self, is_warmup, failures):
+        attempts = iter(failures)
+        calls = []
+        current = {}
+
+        def fake_run_suite(executable, suite, iterations, out_path):
+            arm = executable
+            if not calls or calls[-1][0] == "head":
+                current["failing"] = next(attempts)
+            calls.append((arm, suite))
+            return arm not in current["failing"]
+
+        rnd = bench_plan.Round(index=0 if is_warmup else 1, is_warmup=is_warmup, order=("base", "head"))
+        original = bench_pr.run_suite
+        bench_pr.run_suite = fake_run_suite
+        try:
+            with tempfile.TemporaryDirectory() as archive, contextlib.redirect_stdout(io.StringIO()):
+                return bench_pr.run_pair(rnd, "WebKitCSS", ["base", "head"], {"base": "base", "head": "head"}, 1,
+                                         archive, "warmup" if is_warmup else "round 1/8"), calls
+        finally:
+            bench_pr.run_suite = original
+
+    def test_a_suite_that_fails_in_both_arms_both_times_in_the_warmup_is_left_out(self):
+        outs, calls = self.run_pair(True, [{"base", "head"}, {"base", "head"}])
+        self.assertIsNone(outs)
+        # Both arms ran on both attempts, so the failure is known to be in both.
+        self.assertEqual([arm for arm, _ in calls], ["base", "head", "base", "head"])
+
+    def test_a_suite_that_fails_in_only_one_arm_in_the_warmup_stops_the_run(self):
+        with self.assertRaises(SystemExit):
+            self.run_pair(True, [{"base"}, {"base"}])
+
+    def test_a_suite_that_fails_in_both_arms_in_a_kept_round_stops_the_run(self):
+        with self.assertRaises(SystemExit):
+            self.run_pair(False, [{"base", "head"}, {"base", "head"}])
+
+    def test_a_suite_that_fails_in_each_arm_once_stops_the_run(self):
+        # Neither arm failed both times, so the suite runs at both revisions; the failures were stalls, not a hang.
+        with self.assertRaises(SystemExit):
+            self.run_pair(True, [{"base"}, {"head"}])
+
+    def test_a_failure_the_retry_clears_keeps_the_suite(self):
+        outs, _ = self.run_pair(True, [{"base", "head"}, set()])
+        self.assertEqual(sorted(outs), ["base", "head"])
 
 class CacheSeed(unittest.TestCase):
     def test_a_fresh_worktree_gets_a_copy_of_the_source_tree_caches(self):

@@ -383,18 +383,24 @@ def machine_description(ncpu):
 
 def run_pair(rnd, suite, order, arms, iterations, archive, label):
     """Both arms of one suite, in the schedule's order for that suite. A failed arm retries the pair once — so a single
-    stall doesn't throw away the round."""
+    stall doesn't throw away the round. Returns None for a suite that failed in both arms both times in the warmup: That
+    suite can't be measured at either revision, so the run goes on without it."""
+    always_failed = set(order)
     for attempt in (1, 2):
         outs = {}
         for arm in order:
             out = os.path.join(archive, f"r{rnd.index}-{arm}-{suite}.json")
-            if not run_suite(arms[arm], suite, iterations, out):
-                print(f"      {arm} arm failed on {suite} in {label}" +
-                      ("; redoing the pair" if attempt == 1 else ""))
-                break
-            outs[arm] = out
-        else:
+            if run_suite(arms[arm], suite, iterations, out):
+                outs[arm] = out
+            else:
+                print(f"      {arm} arm failed on {suite} in {label}")
+        if len(outs) == len(order):
             return outs
+        always_failed -= set(outs)
+        if attempt == 1:
+            print(f"      redoing the {suite} pair")
+    if rnd.is_warmup and always_failed == set(order):
+        return None
     sys.exit(f"Aborting: {suite} failed twice in {label}. A partial arm is not comparable.")
 
 
@@ -518,6 +524,7 @@ def main():
 
     collected = {"base": [], "head": []}
     round_seeds = {}
+    dropped = []
     for rnd in plan:
         label = "warmup" if rnd.is_warmup else f"round {rnd.index}/{args.rounds}"
         relinked = ""
@@ -537,8 +544,15 @@ def main():
         for suite, arm in bench_plan.schedule(rnd, suites):
             orders.setdefault(suite, []).append(arm)
         merged = {"base": {}, "head": {}}
-        for suite in suites:
+        for suite in list(suites):
             outs = run_pair(rnd, suite, orders[suite], arms, args.iterations, archive, label)
+            if outs is None:
+                print(f"  warning:  {suite} failed in both arms in the warmup, so the run leaves it out")
+                suites.remove(suite)
+                dropped.append(suite)
+                if not suites:
+                    sys.exit("Aborting: every suite failed in both arms in the warmup, so there's nothing to compare.")
+                continue
             for arm, out in outs.items():
                 with open(out) as f:
                     merged[arm].update(json.load(f))
@@ -560,7 +574,8 @@ def main():
         "baseline": base_sha[:11], "branch": head_sha[:11], "benchmarks": benchmarks_sha,
         "build": build,
         "machine": machine,
-        "suites": ", ".join(suites) + (f"; {args.iterations} iterations per launch" if args.iterations > 1 else ""),
+        "suites": ", ".join(suites) + (f"; {args.iterations} iterations per launch" if args.iterations > 1 else "") +
+                  (f"; left out, since they failed in both arms: {', '.join(dropped)}" if dropped else ""),
     }
     if run_seed is not None:
         provenance["layout_seed"] = run_seed
