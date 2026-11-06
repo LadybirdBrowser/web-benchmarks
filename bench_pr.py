@@ -381,10 +381,17 @@ def machine_description(ncpu):
     return f"{platform.machine()}, {ncpu} cores, {platform.system()} {platform.release()}"
 
 
-def run_pair(rnd, suite, order, arms, iterations, archive, label):
+# What run_pair() returns for a suite that only the base fails in the warmup: The branch runs a suite its merge-base
+# can't, which is a finding in itself, and nothing the two arms could be compared on.
+BASE_ONLY_FAILURE = "base-only failure"
+
+
+def run_pair(rnd, suite, order, arms, iterations, archive, label, compare=True):
     """Both arms of one suite, in the schedule's order for that suite. A failed arm retries the pair once — so a single
     stall doesn't throw away the round. Returns None for a suite that failed in both arms both times in the warmup: That
-    suite can't be measured at either revision, so the run goes on without it."""
+    suite can't be measured at either revision, so the run goes on without it. And in a comparison (not a calibration),
+    returns BASE_ONLY_FAILURE for a suite the base failed both times in the warmup while the head ran it: The run goes
+    on without that suite too, and reports it."""
     always_failed = set(order)
     for attempt in (1, 2):
         outs = {}
@@ -401,6 +408,8 @@ def run_pair(rnd, suite, order, arms, iterations, archive, label):
             print(f"      redoing the {suite} pair")
     if rnd.is_warmup and always_failed == set(order):
         return None
+    if rnd.is_warmup and compare and always_failed == {"base"}:
+        return BASE_ONLY_FAILURE
     sys.exit(f"Aborting: {suite} failed twice in {label}. A partial arm is not comparable.")
 
 
@@ -525,6 +534,7 @@ def main():
     collected = {"base": [], "head": []}
     round_seeds = {}
     dropped = []
+    base_only = []
     for rnd in plan:
         label = "warmup" if rnd.is_warmup else f"round {rnd.index}/{args.rounds}"
         relinked = ""
@@ -545,7 +555,16 @@ def main():
             orders.setdefault(suite, []).append(arm)
         merged = {"base": {}, "head": {}}
         for suite in list(suites):
-            outs = run_pair(rnd, suite, orders[suite], arms, args.iterations, archive, label)
+            outs = run_pair(rnd, suite, orders[suite], arms, args.iterations, archive, label,
+                            compare=not args.calibrate)
+            if outs == BASE_ONLY_FAILURE:
+                print(f"  warning:  {suite} failed in the base arm, but ran in the head arm, in the warmup, so the run "
+                      "leaves it out and reports it")
+                suites.remove(suite)
+                base_only.append(suite)
+                if not suites:
+                    sys.exit("Aborting: no suite ran in both arms in the warmup, so there's nothing to compare.")
+                continue
             if outs is None:
                 print(f"  warning:  {suite} failed in both arms in the warmup, so the run leaves it out")
                 suites.remove(suite)
@@ -575,7 +594,9 @@ def main():
         "build": build,
         "machine": machine,
         "suites": ", ".join(suites) + (f"; {args.iterations} iterations per launch" if args.iterations > 1 else "") +
-                  (f"; left out, since they failed in both arms: {', '.join(dropped)}" if dropped else ""),
+                  (f"; left out, since they failed in both arms: {', '.join(dropped)}" if dropped else "") +
+                  (f"; left out, since only the base failed them (the branch ran them): {', '.join(base_only)}"
+                   if base_only else ""),
     }
     if run_seed is not None:
         provenance["layout_seed"] = run_seed

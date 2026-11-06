@@ -31,7 +31,7 @@ class Arguments(unittest.TestCase):
 class FailingSuites(unittest.TestCase):
     """run_pair over a stand-in run_suite that fails for the arms given: per attempt, the set of arms that fail."""
 
-    def run_pair(self, is_warmup, failures):
+    def run_pair(self, is_warmup, failures, compare=True):
         attempts = iter(failures)
         calls = []
         current = {}
@@ -49,7 +49,7 @@ class FailingSuites(unittest.TestCase):
         try:
             with tempfile.TemporaryDirectory() as archive, contextlib.redirect_stdout(io.StringIO()):
                 return bench_pr.run_pair(rnd, "WebKitCSS", ["base", "head"], {"base": "base", "head": "head"}, 1,
-                                         archive, "warmup" if is_warmup else "round 1/8"), calls
+                                         archive, "warmup" if is_warmup else "round 1/8", compare=compare), calls
         finally:
             bench_pr.run_suite = original
 
@@ -59,9 +59,23 @@ class FailingSuites(unittest.TestCase):
         # Both arms ran on both attempts, so the failure is known to be in both.
         self.assertEqual([arm for arm, _ in calls], ["base", "head", "base", "head"])
 
-    def test_a_suite_that_fails_in_only_one_arm_in_the_warmup_stops_the_run(self):
+    def test_a_suite_that_only_the_base_fails_in_the_warmup_is_left_out_and_reported(self):
+        outs, calls = self.run_pair(True, [{"base"}, {"base"}])
+        self.assertEqual(outs, bench_pr.BASE_ONLY_FAILURE)
+        self.assertEqual([arm for arm, _ in calls], ["base", "head", "base", "head"])
+
+    def test_a_suite_that_only_the_head_fails_in_the_warmup_stops_the_run(self):
         with self.assertRaises(SystemExit):
-            self.run_pair(True, [{"base"}, {"base"}])
+            self.run_pair(True, [{"head"}, {"head"}])
+
+    def test_a_suite_that_only_one_arm_fails_in_a_calibration_warmup_stops_the_run(self):
+        # Both arms are the same revision, so a failure in just one of them is a stall, not a finding.
+        with self.assertRaises(SystemExit):
+            self.run_pair(True, [{"base"}, {"base"}], compare=False)
+
+    def test_a_suite_that_only_the_base_fails_in_a_kept_round_stops_the_run(self):
+        with self.assertRaises(SystemExit):
+            self.run_pair(False, [{"base"}, {"base"}])
 
     def test_a_suite_that_fails_in_both_arms_in_a_kept_round_stops_the_run(self):
         with self.assertRaises(SystemExit):
