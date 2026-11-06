@@ -581,7 +581,8 @@ def main():
         provenance["layout_seed"] = run_seed
     if floor and not args.calibrate:
         provenance["calibration"] = (f"A-vs-A on {floor['when'][:8]}: {floor['false_movers']} false mover(s), "
-                                     f"resolution {PLUS_MINUS}{floor['p90_pct']:.1f}% p90")
+                                     f"resolution {PLUS_MINUS}{floor['p90_pct']:.1f}% p90" +
+                                     (f", without {', '.join(floor['dropped'])}" if floor.get("dropped") else ""))
 
     if args.calibrate:
         print(f"\nA-vs-A calibration: resolution {analysis.resolution_median_pct:.2f}% median, "
@@ -590,9 +591,11 @@ def main():
         if analysis.movers:
             print("  " + ", ".join(f"{m.test} {m.effect_pct:+.1f}%" for m in analysis.movers))
             print("  Non-zero here means this machine is too noisy to trust at these settings.")
-        if bench_plan.records_floor(suites):
+        # A suite the warmup left out can't run at either revision on this machine, so a comparison here leaves it out
+        # too; the calibration still covers everything a comparison measures.
+        if bench_plan.records_floor(suites + dropped):
             json.dump({"median_pct": analysis.resolution_median_pct, "p90_pct": analysis.resolution_p90_pct,
-                       "rounds": args.rounds, "iterations": args.iterations, "suites": suites,
+                       "rounds": args.rounds, "iterations": args.iterations, "suites": suites, "dropped": dropped,
                        "false_movers": len(analysis.movers), "machine": machine, "build": build,
                        "benchmarks": benchmarks_sha, "when": stamp}, open(floor_path, "w"), indent=2)
             print(f"written to {floor_path}")
