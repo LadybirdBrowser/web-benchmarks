@@ -104,6 +104,24 @@ class CacheSeed(unittest.TestCase):
                 self.assertEqual(f.read(), "object")
 
 
+class VcpkgClone(unittest.TestCase):
+    def test_a_clone_comes_from_the_url_given(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            upstream = VcpkgCheckout.make(os.path.join(tmp, "upstream"))
+            checkout = os.path.join(tmp, "tree/Build/vcpkg")
+            bench_pr.clone_vcpkg(os.path.join(tmp, "source"), checkout, url=upstream, delay=0)
+            self.assertEqual(bench_pr.git(["rev-parse", "HEAD"], checkout), bench_pr.git(["rev-parse", "HEAD"], upstream))
+
+    def test_a_clone_that_fails_every_time_stops_the_run_with_the_error_from_git(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            checkout = os.path.join(tmp, "tree/Build/vcpkg")
+            with self.assertRaises(SystemExit) as stop:
+                bench_pr.clone_vcpkg(tmp, checkout, url=os.path.join(tmp, "missing"), delay=0)
+            self.assertIn(checkout, str(stop.exception.code))
+            self.assertIn("missing", str(stop.exception.code).split("\n", 1)[1])
+            self.assertFalse(os.path.exists(checkout))
+
+
 class VcpkgCheckout(unittest.TestCase):
     @staticmethod
     def make(tmp, baseline=None):

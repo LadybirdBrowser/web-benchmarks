@@ -21,6 +21,7 @@ import os
 import platform
 import random
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -215,6 +216,24 @@ def seed_caches(source_repo, tree):
         print("  couldn't seed Build/caches from the source tree; the first build compiles everything")
 
 
+VCPKG_URL = "https://github.com/microsoft/vcpkg.git"
+
+
+def clone_vcpkg(source_repo, checkout, url=VCPKG_URL, attempts=2, delay=10):
+    """Clone vcpkg into an arm's tree, borrowing objects from the source tree's checkout where it has one. A clone that
+    still fails after a retry stops the run with git's own message, rather than the build failing later for want of a
+    checkout."""
+    for attempt in range(attempts):
+        if attempt:
+            time.sleep(delay)
+        proc = sh(["git", "clone", "--reference-if-able", os.path.join(source_repo, "Build/vcpkg"), "--dissociate",
+                   url, checkout], check=False)
+        if proc.returncode == 0:
+            return
+        shutil.rmtree(checkout, ignore_errors=True)
+    sys.exit(f"Couldn't clone vcpkg into {checkout}:\n{proc.stdout.strip()}")
+
+
 def ensure_worktree(slot, sha, source_repo, worktree_root):
     """A persistent detached worktree per arm, so ccache stays warm across branches."""
     os.makedirs(worktree_root, exist_ok=True)
@@ -224,11 +243,11 @@ def ensure_worktree(slot, sha, source_repo, worktree_root):
         sh(["git", "worktree", "add", "--detach", tree, sha], cwd=source_repo)
         os.makedirs(os.path.join(tree, "Build"), exist_ok=True)
         seed_caches(source_repo, tree)
-        sh(["git", "clone", "--reference-if-able", os.path.join(source_repo, "Build/vcpkg"),
-            "--dissociate", "https://github.com/microsoft/vcpkg.git",
-            os.path.join(tree, "Build/vcpkg")], check=False)
     elif git(["rev-parse", "HEAD"], tree) != sha:
         sh(["git", "checkout", "--detach", sha], cwd=tree)
+    # Also for a tree an earlier run created but couldn't clone into.
+    if not os.path.isdir(os.path.join(tree, "Build/vcpkg/.git")):
+        clone_vcpkg(source_repo, os.path.join(tree, "Build/vcpkg"))
 
     stamp = os.path.join(tree, ".bench-built-sha")
     built = open(stamp).read().strip() if os.path.exists(stamp) else None
